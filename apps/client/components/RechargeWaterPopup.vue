@@ -1,0 +1,31 @@
+<script setup lang="ts">
+const show = defineModel<boolean>()
+const money = ref<number>(0)
+function recharge() {
+  showSuccessToast('充值成功')
+  show.value = false
+}
+</script>
+
+<template>
+  <van-popup
+    class="p-8 rounded-lg"
+    v-model:show="show"
+  >
+    <div class="font-bold text-center mb-2">交水费</div>
+    <van-field
+      v-model="money"
+      type="number"
+      label="充值的金额"
+      class="mb-5"
+    />
+    <van-button
+      round
+      block
+      type="primary"
+      @click="recharge"
+    >
+      充值
+    </van-button>
+  </van-popup>
+</template>
