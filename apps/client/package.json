@@ -1,0 +1,37 @@
+{
+  "name": "@YouXiaoTong/client",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/eslint": "0.7.4",
+    "@pinia/nuxt": "^0.9.0",
+    "clsx": "^2.1.1",
+    "nuxt": "^3.15.1",
+    "pinia": "^2.3.1",
+    "sass": "^1.83.4",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@nuxtjs/tailwindcss": "^6.13.1",
+    "@vant/nuxt": "^1.0.6",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-vue": "^9.32.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript-eslint": "^8.20.0",
+    "vant": "^4.9.16",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-tailwindcss": "^0.6.11"
+  }
+}

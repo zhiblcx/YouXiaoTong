@@ -1,0 +1,17 @@
+{
+  "name": "YouXiaoTong",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "dev:client": "pnpm -F client dev"
+  },
+  "keywords": [],
+  "author": "nicole",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-tailwindcss": "^0.6.11"
+  }
+}
