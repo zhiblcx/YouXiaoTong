@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PlusIcon from '@/assets/images/plus-icon.png'
-import MinusIcon from '@/assets/images/miuns-icon.png'
+import MinusIcon from '@/assets/images/minus-icon.png'
 import ShoppingCarIcon from '@/assets/images/shopping-card-icon.png'
 import LoginImg from '@/assets/images/login.jpg'
 
