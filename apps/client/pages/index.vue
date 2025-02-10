@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import QrScanner from 'qr-scanner'
 import LoginImg from '@/assets/images/login.jpg'
-import ArrowRightSvg from '~/assets/svg/ArrowRightSvg.vue'
 import LightningIcon from '@/assets/images/lightning-icon.png'
 import ScanIcon from '@/assets/images/scan-icon.png'
 import TakeawayIcon from '@/assets/images/takeaway-icon.png'
@@ -14,7 +14,21 @@ const pageSize = ref(5)
 const show = ref<boolean>(false)
 const waterBillShow = ref<boolean>(false)
 const lightningBillShow = ref<boolean>(false)
-const active = ref()
+const active = ref<number>(0)
+const video = ref<HTMLVideoElement | null>(null)
+const videoShow = ref<boolean>(false)
+let qrScanner: QrScanner | null = null
+const message = ref('')
+
+watch(active, () => {
+  switch (active.value) {
+    case 0:
+      router.push('/')
+      break
+    case 1:
+      router.push('/User')
+  }
+})
 
 const data = [
   { title: '考试安排1', timer: '2025/02/08 21:13' },
@@ -64,27 +78,50 @@ function showLightningBillPopup() {
   lightningBillShow.value = true
 }
 
-function toCampusCard() {
-  router.push('/campuscard')
+function handleScanner() {
+  videoShow.value = true
+
+  nextTick(() => {
+    qrScanner = new QrScanner(
+      video.value as HTMLVideoElement,
+      (res: QrScanner.ScanResult) => {
+        message.value = res.data
+      },
+      {
+        onDecodeError(error) {},
+        preferredCamera: 'environment',
+        highlightScanRegion: true,
+        highlightCodeOutline: true
+      }
+    )
+    qrScanner.start()
+  })
+}
+
+function handleOrderFood() {
+  router.push('/takeaway')
 }
 </script>
 
 <template>
+  <van-popup
+    v-model:show="videoShow"
+    @closed="(qrScanner as QrScanner).stop()"
+  >
+    <video ref="video" />
+  </van-popup>
+
   <RechargePopup v-model="show" />
   <RechargeWaterPopup v-model="waterBillShow" />
   <RechargeLightningPopup v-model="lightningBillShow" />
 
   <div class="bg-[#f2f2f2] min-h-screen">
     <div class="flex justify-around items-center text-white pt-8">
-      <div
-        class="flex items-center rounded-lg h-[70px] w-[140px] p-3 bg-[--van-primary-pink-color]"
-        @click="toCampusCard"
-      >
+      <div class="flex items-center rounded-lg h-[70px] w-[140px] p-3 bg-[--van-primary-pink-color]">
         <div>
           <div>校园卡余额：</div>
           <div>¥ 0.00</div>
         </div>
-        <ArrowRightSvg />
       </div>
       <div
         @click="showPopup"
@@ -108,14 +145,14 @@ function toCampusCard() {
         />
         <div class="text-sm text-center mt-1">交水费</div>
       </li>
-      <li>
+      <li @click="handleOrderFood">
         <img
           :src="TakeawayIcon"
           class="bg-[--van-primary-pink-color] p-2 rounded-[50%]"
         />
         <div class="text-sm text-center mt-1">点餐</div>
       </li>
-      <li>
+      <li @click="handleScanner">
         <img
           :src="ScanIcon"
           class="bg-[--van-primary-pink-color] p-2 rounded-[50%]"
@@ -135,11 +172,7 @@ function toCampusCard() {
           class="flex justify-between pt-3"
           v-for="(item, index) in list"
           :key="index"
-          @click="
-            () => {
-              router.push(`article/${index}`)
-            }
-          "
+          @click="router.push(`article/${index}`)"
         >
           <div class="flex flex-col justify-between w-[65%] mt-2">
             <div class="line-clamp-">{{ item.title }}</div>
