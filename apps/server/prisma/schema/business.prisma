@@ -1,0 +1,19 @@
+enum BusinessType {
+  水电
+  食堂
+}
+
+model Business {
+  id          Int           @id @default(autoincrement())
+  name        String
+  phone       String
+  status      Boolean       @default(false)
+  password    String
+  type        BusinessType
+  staff       Int
+  logwork     Float         @default(0.5)
+  wrap        Float         @default(0.5)
+  menus       Menu[]
+  transaction Transaction[]
+  Utilities   Utilities[]
+}

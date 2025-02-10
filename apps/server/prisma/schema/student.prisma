@@ -1,0 +1,11 @@
+model Student {
+  id          Int           @id @default(autoincrement())
+  name        String
+  sex         String
+  age         Int
+  money       Int           @default(0)
+  dormitory   String
+  password    String
+  Address     Address[]
+  transaction Transaction[]
+}

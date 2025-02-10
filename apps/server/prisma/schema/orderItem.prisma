@@ -1,0 +1,8 @@
+model orderItem {
+  id       Int    @id @default(autoincrement())
+  Order    Order? @relation(fields: [orderId], references: [id])
+  orderId  Int?
+  menu     Menu   @relation(fields: [menuId], references: [id])
+  menuId   Int
+  quantity Int // 菜品的购买数量
+}

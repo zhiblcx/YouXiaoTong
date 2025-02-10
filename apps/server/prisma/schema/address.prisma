@@ -1,0 +1,10 @@
+model Address {
+  id        Int     @id @default(autoincrement())
+  name      String
+  phone     String
+  detail    String
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId Int
+  isDefault Boolean @default(false)
+  Order     Order[]
+}
