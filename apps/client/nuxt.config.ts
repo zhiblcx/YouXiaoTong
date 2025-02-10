@@ -6,6 +6,12 @@ export default defineNuxtConfig({
       title:appConfig.APP_NAME_CHINESE
     }
   },
+  devServer:{
+    https:{
+      key:'./cert.key',
+      cert:'./cert.crt'
+    }
+  },
   compatibilityDate: '2024-11-01',
   devtools: { enabled: false },
   modules: [
