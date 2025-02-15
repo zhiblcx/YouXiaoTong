@@ -1,11 +1,23 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { showAllUserApi, deleteUserApi } from '../api'
 import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
+import { addBusinessApi, getBusinessApi, updateBusinessApi, deleteBusinessApi } from '@/api'
 
+const options = ref([
+  {
+    value: '食堂',
+    label: '食堂'
+  },
+  {
+    value: '水电',
+    label: '水电'
+  }
+])
 const addOpen = ref(false)
-const addStudent = ref({ name: '', sex: 1 })
+const updateOpen = ref(false)
+const addBusiness = ref({ name: '', staff: '', phone: '', type: options.value[0] })
+const updateBusiness = ref()
 
 const columns = ref([
   {
@@ -19,19 +31,19 @@ const columns = ref([
     key: 'name'
   },
   {
+    title: '类型',
+    dataIndex: 'type',
+    key: 'type'
+  },
+  {
     title: '手机号码',
     dataIndex: 'phone',
     key: 'phone'
   },
   {
     title: '员工数量',
-    dataIndex: 'staffNumber',
-    key: 'staffNumber'
-  },
-  {
-    title: '类型',
-    dataIndex: 'type',
-    key: 'type'
+    dataIndex: 'staff',
+    key: 'staff'
   },
   {
     title: '是否营业',
@@ -44,60 +56,96 @@ const columns = ref([
     key: 'action'
   }
 ])
-const data = ref([])
+const businessData = ref([])
 const search = ref()
 const originData = ref([])
 
 onMounted(async () => {
-  // const result = await showAllUserApi()
-  // if (result.data.code == 200) {
-  //   data.value = result.data.data
-  //   originData.value = [...data.value]
-  // }
-  data.value = [
-    {
-      id: '1010',
-      name: '张三',
-      phone: '182555550',
-      staffNumber: 10,
-      type: '食堂',
-      status: true
-    },
-    {
-      id: '1012',
-      name: '张四',
-      phone: '182555550',
-      staffNumber: 10,
-      type: '水电',
-      status: false
-    }
-  ]
-
-  originData.value = [...data.value]
+  initData()
 })
 
+const initData = async () => {
+  const { data } = await getBusinessApi()
+  if (data.status === undefined) {
+    businessData.value = data
+    originData.value = [...businessData.value]
+  }
+}
+
 const onSearch = () => {
-  data.value = originData.value.filter((item) => {
+  businessData.value = originData.value.filter((item) => {
     const searchValue = search.value
     const regex = new RegExp(searchValue, 'i')
     return regex.test(item.name)
   })
 }
 
+const handleUpdate = (record) => {
+  updateBusiness.value = { ...record }
+  updateBusiness.value.type = { ...options.value.find((item) => item.value === record.type) }
+  updateOpen.value = true
+}
+
 // 删除确认框
 const dismiss = async (id) => {
-  const result = await deleteUserApi(id)
-  console.log(result)
-  if (result.data.code == 200) {
-    data.value = data.value.filter((value) => value.id != id)
+  const { data } = await deleteBusinessApi(id)
+  if (data.statusCode === undefined) {
+    businessData.value = businessData.value.filter((value) => value.id != id)
     message.success('删除成功')
   } else {
     message.error('删除失败')
   }
 }
 
-// 添加学生
-const handlerAddSave = () => {}
+// 添加商家
+const handlerAddSave = async () => {
+  const phoneRegex = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
+  const business = addBusiness.value
+  if (!business.name || !business.phone || !business.staff) {
+    message.error('请填写完整')
+  } else if (phoneRegex.test(business.phone)) {
+    const { data } = await addBusinessApi({
+      name: business.name,
+      phone: business.phone,
+      staff: business.staff,
+      type: business.type.value
+    })
+    if (data.statusCode === undefined) {
+      message.success('添加成功')
+      addOpen.value = false
+      await initData()
+      addBusiness.value = { name: '', staff: '', phone: '', type: options.value[0] }
+    } else {
+      message.error(data.message)
+    }
+  } else {
+    message.error('请输入正确的手机号码')
+  }
+}
+
+const handleUpdateSave = async () => {
+  const phoneRegex = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
+  const business = updateBusiness.value
+  if (!business.name || !business.phone || !business.staff) {
+    message.error('请填写完整')
+  } else if (phoneRegex.test(business.phone)) {
+    const { data } = await updateBusinessApi(business.id, {
+      name: business.name,
+      phone: business.phone,
+      staff: business.staff,
+      type: business.type.value
+    })
+    if (data.statusCode === undefined) {
+      message.success('修改成功')
+      updateOpen.value = false
+      await initData()
+    } else {
+      message.error(data.message)
+    }
+  } else {
+    message.error('请输入正确的手机号码')
+  }
+}
 </script>
 
 <template>
@@ -119,7 +167,7 @@ const handlerAddSave = () => {}
 
   <a-table
     :columns="columns"
-    :data-source="data"
+    :data-source="businessData"
   >
     <template #headerCell="{ column }">
       <template v-if="column.key === 'id'">
@@ -148,6 +196,7 @@ const handlerAddSave = () => {}
         <a-button
           type="primary"
           style="margin-left: 20px"
+          @click="handleUpdate(record)"
           >修改</a-button
         >
         <a-popconfirm
@@ -188,30 +237,86 @@ const handlerAddSave = () => {}
     </template>
     <div style="text-align: left; padding-left: 40px">
       <div style="margin-bottom: 20px; margin-top: 20px">
-        <span style="display: inline-block; width: 80px">学生姓名：</span>
+        <span style="display: inline-block; width: 80px">商家姓名：</span>
         <a-input
-          v-model:value="addStudent.name"
+          v-model:value="addBusiness.name"
           style="width: 200px"
         />
       </div>
       <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
-        <span style="display: inline-block; width: 80px">年龄：</span>
+        <span style="display: inline-block; width: 80px">员工数量：</span>
         <a-input-number
-          v-model:value="addStudent.age"
+          v-model:value="addBusiness.staff"
           :min="1"
         />
       </div>
       <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
-        <span style="display: inline-block; width: 80px">性别：</span>
-        <a-radio-group v-model:value="addStudent.sex">
-          <a-radio :value="1">男</a-radio>
-          <a-radio :value="2">女</a-radio>
-        </a-radio-group>
+        <span style="display: inline-block; width: 80px">商家类型：</span>
+        <a-select
+          v-model:value="addBusiness.type"
+          style="width: 120px"
+          :options="options"
+          @change="handleChange"
+        ></a-select>
       </div>
       <div style="margin-bottom: 20px; margin-top: 20px">
-        <span style="display: inline-block; width: 80px">宿舍号：</span>
+        <span style="display: inline-block; width: 80px">电话号码</span>
         <a-input
-          v-model:value="addStudent.dormitory"
+          v-model:value="addBusiness.phone"
+          style="width: 200px"
+        />
+      </div>
+    </div>
+  </a-modal>
+
+  <a-modal
+    v-model:open="updateOpen"
+    title="修改商家信息"
+    style="text-align: center"
+  >
+    <template #footer>
+      <a-button
+        key="back"
+        @click="updateOpen = false"
+      >
+        取消
+      </a-button>
+      <a-button
+        key="submit"
+        type="primary"
+        @click="handleUpdateSave"
+      >
+        确定
+      </a-button>
+    </template>
+    <div style="text-align: left; padding-left: 40px">
+      <div style="margin-bottom: 20px; margin-top: 20px">
+        <span style="display: inline-block; width: 80px">商家姓名：</span>
+        <a-input
+          v-model:value="updateBusiness.name"
+          style="width: 200px"
+        />
+      </div>
+      <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
+        <span style="display: inline-block; width: 80px">员工数量：</span>
+        <a-input-number
+          v-model:value="updateBusiness.staff"
+          :min="1"
+        />
+      </div>
+      <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
+        <span style="display: inline-block; width: 80px">商家类型：</span>
+        <a-select
+          v-model:value="updateBusiness.type"
+          style="width: 120px"
+          :options="options"
+          @change="handleChange"
+        ></a-select>
+      </div>
+      <div style="margin-bottom: 20px; margin-top: 20px">
+        <span style="display: inline-block; width: 80px">电话号码</span>
+        <a-input
+          v-model:value="updateBusiness.phone"
           style="width: 200px"
         />
       </div>
