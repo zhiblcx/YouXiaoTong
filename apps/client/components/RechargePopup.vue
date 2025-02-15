@@ -1,9 +1,18 @@
 <script setup lang="ts">
+import { rechargeApi } from '@/composables/auth'
+import { useMoneyStore } from '~/shared/store/person'
+const moneyStore = useMoneyStore()
 const show = defineModel<boolean>()
-const money = ref<number>(0)
-function recharge() {
-  showSuccessToast('充值成功')
-  show.value = false
+const money = ref<number>(1)
+
+async function recharge() {
+  const { data } = await rechargeApi(money.value)
+  if (data.value.response === undefined) {
+    moneyStore.setMoney(moneyStore.money + Number(money.value))
+    showSuccessToast('充值成功')
+    show.value = false
+    money.value = 1
+  }
 }
 </script>
 
