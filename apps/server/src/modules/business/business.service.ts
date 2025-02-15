@@ -11,6 +11,12 @@ export class BusinessService {
     return await this.prisma.business.findMany();
   }
 
+  async getOrderList(userId: number) {
+    return await this.prisma.order.findMany({
+      where: { businessId: userId },
+    });
+  }
+
   async updateBusiness(id: number, updateBusinessDto: CreateBusinessDto) {
     return await this.prisma.business.update({
       where: { id },
@@ -24,7 +30,6 @@ export class BusinessService {
   }
 
   async addBusiness(createStudentDto: CreateBusinessDto) {
-    console.log(createStudentDto);
     return await this.prisma.business.create({
       data: {
         name: createStudentDto.name,

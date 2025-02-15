@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Request,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -29,6 +30,13 @@ export class BusinessController {
   @Get()
   async getStudentList() {
     return this.businessService.getBusinessList();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '获取商家订单列表' })
+  @Get('/order')
+  async getOrderList(@Request() req) {
+    return this.businessService.getOrderList(Number(req.user.userId));
   }
 
   @HttpCode(HttpStatus.OK)
