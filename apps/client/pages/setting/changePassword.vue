@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import ChangePasswordImg from '@/assets/images/change-password.png'
+import { routerKey } from 'vue-router'
+import { ChangePasswordApi } from '~/composables/auth'
 const oldPassword = ref<string>('')
 const newPassword = ref<string>('')
 const confirmPassword = ref<string>('')
@@ -10,8 +12,19 @@ function asyncValidator(): boolean {
   return false
 }
 
-function onSubmit() {
-  showSuccessToast('修改密码')
+async function onSubmit() {
+  if (newPassword.value.length < 6) {
+    return showFailToast('密码长度不能小于6位')
+  }
+
+  const { data } = await ChangePasswordApi(oldPassword.value, newPassword.value)
+  if (data.value.response === undefined) {
+    showSuccessToast('修改成功')
+    localStorage.removeItem('token')
+    navigateTo('/')
+  } else {
+    showFailToast(data.value.message)
+  }
 }
 </script>
 
