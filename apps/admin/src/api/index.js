@@ -1,43 +1,34 @@
 import request from './request'
 
 // 登录
-export const loginApi = data => request.post('/admin/login', data)
+export const loginApi = (data) => request.post('/auth/login', data)
+export const changePasswordApi = (data) => request.put('/auth/password', data)
+export const showPersonApi = () => request.get('/auth')
 
-// 获取全部用户
-export const showAllUserApi = () => request.get('/admin/showalluser')
+// 学生
+export const addStudentApi = (data) => request.post('/student', data)
+export const getStudentApi = () => request.get('/student')
+export const updateStudentApi = (id, data) => request.put(`/student/${id}`, data)
+export const deleteStudentApi = (id) => request.delete(`/student/${id}`)
 
-// 删除指定用户
-export const deleteUserApi = id => request.get(`/admin/delete?user_id=${id}`)
+// 商家
+export const addBusinessApi = (data) => request.post('/business', data)
+export const getBusinessApi = () => request.get('/business')
+export const updateBusinessApi = (id, data) => request.put(`/business/${id}`, data)
+export const deleteBusinessApi = (id) => request.delete(`/business/${id}`)
 
-// 上传文章
-export const uploadArticleApi = data => request.post('/admin/uploadarticle', data)
+// 文章
+export const addArticleApi = (data) => request.post('/article', data)
+export const getArticleApi = () => request.get('/article')
+export const deleteArticleApi = (id) => request.delete(`/article/${id}`)
+export const updateArticleApi = (id, data) => request.put(`/article/${id}`, data)
+export const updateArticleStatusApi = (id, status) => request.put(`/article/status/${id}?status=${status}`)
+export const showArticleByIdApi = (id) => request.get(`/article/${id}`)
 
-// 删除文章
-export const deleteArticleApi = id => request.get(`/admin/deletearticle?id=${id}`)
-
-// 修改文章
-export const updateArticleApi = data => request.post('/admin/editarticle', data)
-
-// 查看所有文章
-export const showAllArticle = () => request.post('/users/acquirearticle')
-
-// 查看指定文章
-export const showPointArticle = id => request.get(`/users/article?id=${id}`)
-
-// 查看指定活动
-export const showPointActivity = id => request.get(`/users/activity?id=${id}`)
-
-// 查看所有活动
-export const showAllActivity = () => request.get('/users/acquireallactivity')
-
-// 删除活动
-export const deleteActivity = id => request.get(`/admin/deleteactivity?activity_id=${id}`)
-
-// 上传活动
-export const uploadActivity = data => request.post('/admin/uploadactivity', data)
-
-// 获取全部帖子
-export const showAllTrends = () => request.get('/users/acquirealltrends')
-
-// 删除帖子
-export const deleteTrends = id => request.get(`/admin/deletetrends?trends_id=${id}`)
+// 菜单
+export const addMenuApi = (data) => request.post('/menu', data)
+export const getMenuApi = () => request.get('/menu/business')
+export const updateMenuApi = (id, data) => request.put(`/menu/${id}`, data)
+export const deleteMenuApi = (id) => request.delete(`/menu/${id}`)
+export const updateMenuStatusApi = (id, status) => request.put(`/menu/status/${id}?status=${status}`)
+export const showMenuByIdApi = (id) => request.get(`/menu/${id}`)

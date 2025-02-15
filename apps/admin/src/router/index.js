@@ -115,12 +115,12 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
-  // const token = localStorage.getItem('token')
-  // if (to.path != '/login' && !token) {
-  //   next({ path: '/login' })
-  // } else {
-  next()
-  // }
+  const token = localStorage.getItem('token')
+  if (to.path != '/login' && !token) {
+    next({ path: '/login' })
+  } else {
+    next()
+  }
 })
 
 router.afterEach((to, from) => {

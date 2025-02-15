@@ -5,6 +5,7 @@
     "tailwindcss",
     "nuxt",
     "vant",
-    "YouXiaoTong"
+    "YouXiaoTong",
+    "nuxtjs"
   ]
 }
