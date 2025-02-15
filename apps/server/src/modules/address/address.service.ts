@@ -7,7 +7,28 @@ export class AddressService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAddressList(id) {
-    return await this.prisma.address.findMany({ where: { id: Number(id) } });
+    return await this.prisma.address.findMany({
+      where: { studentId: Number(id) },
+    });
+  }
+
+  async getAddressById(id: number) {
+    return await this.prisma.address.findUnique({
+      where: { id: id },
+    });
+  }
+
+  async updateAddressStatus(userId: number, id: number, status: boolean) {
+    if (status) {
+      await this.prisma.address.updateMany({
+        where: { studentId: userId },
+        data: { isDefault: false },
+      });
+      await this.prisma.address.update({
+        where: { id: Number(id) },
+        data: { isDefault: status },
+      });
+    }
   }
 
   async updateAddress(id: number, updateAddressDto: CreateAddressDto) {
