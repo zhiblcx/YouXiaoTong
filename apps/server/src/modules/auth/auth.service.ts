@@ -28,7 +28,6 @@ export class AuthService {
           where: { account },
         });
     }
-
     if (user?.password !== pass || user === null) {
       return new UnauthorizedException('账号或者密码错误');
     }

@@ -25,6 +25,7 @@ export class AuthController {
   @ApiOperation({ summary: '登录' })
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
+    console.log('有人要登录啦', signInDto);
     return this.authService.signIn(
       signInDto.account,
       signInDto.password,
