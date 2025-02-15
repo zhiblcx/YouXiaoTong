@@ -1,12 +1,12 @@
 model Menu {
   id          Int         @id @default(autoincrement())
   title       String
-  photo       String
-  description String
+  photo       String      @db.LongText
+  description String      @db.LongText
   price       Float
   status      Boolean
-  SellFast    Boolean     @default(false) @map("sell-fast")
-  Business    Business?   @relation(fields: [businessId], references: [id])
+  sellFast    Boolean     @default(false) @map("sell-fast")
+  business    Business?   @relation(fields: [businessId], references: [id])
   businessId  Int?
   orderItem   orderItem[]
 }

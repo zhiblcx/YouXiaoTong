@@ -15,5 +15,6 @@ model Business {
   wrap        Float         @default(0.5)
   menus       Menu[]
   transaction Transaction[]
-  Utilities   Utilities[]
+  utilities   Utilities[]
+  orders      Order[]
 }

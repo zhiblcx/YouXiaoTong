@@ -1,6 +1,18 @@
+enum OrderType {
+  派送中
+  已送达
+  已取消
+}
+
 model Order {
   id         Int         @id @default(autoincrement())
+  note       String?     @db.Text
   orderItems orderItem[]
   address    Address     @relation(fields: [addressId], references: [id])
   addressId  Int
+  Business   Business?   @relation(fields: [businessId], references: [id])
+  businessId Int?
+  Student    Student?    @relation(fields: [studentId], references: [id])
+  studentId  Int?
+  status     OrderType   @default(派送中)
 }

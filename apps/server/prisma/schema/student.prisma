@@ -3,9 +3,10 @@ model Student {
   name        String
   sex         String
   age         Int
-  money       Int           @default(0)
+  money       Float         @default(0.00)
   dormitory   String
   password    String
   Address     Address[]
   transaction Transaction[]
+  orders      Order[]
 }

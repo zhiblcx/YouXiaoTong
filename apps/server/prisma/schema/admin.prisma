@@ -1,5 +1,5 @@
 model Admin {
   id       Int    @id @default(autoincrement())
-  account  String
+  account  String @unique
   password String
 }
