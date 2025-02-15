@@ -3,9 +3,8 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { message } from 'ant-design-vue'
 import { onMounted, ref, toRaw, watch } from 'vue'
-import { uploadArticleApi, updateArticleApi, showPointArticle } from '../../api'
 import { useRouter, useRoute } from 'vue-router'
-import dayjs from 'dayjs'
+import { showMenuByIdApi, addMenuApi, updateMenuApi } from '@/api'
 const router = useRouter()
 const route = useRoute()
 const fileList = ref([])
@@ -13,7 +12,6 @@ const myQuillEditor = ref()
 const fileBtn = ref()
 const imageUrl = ref('')
 const loading = ref(false)
-const price = ref()
 const data = ref({
   content: '',
   editorOption: {
@@ -34,10 +32,10 @@ const data = ref({
   }
 })
 
-const article = ref({
+const product = ref({
   title: '',
-  detail: '',
-  picture: ''
+  price: '',
+  description: ''
 })
 
 watch(
@@ -53,65 +51,63 @@ onMounted(async () => {
   if (myQuillEditor.value) {
     quill.getModule('toolbar').addHandler('image', imgHandler)
   }
+
   const { id } = route.query
-  if (id != undefined) {
-    const result = await showPointArticle(id)
-    if (result.data.code == 200) {
-      article.value = result.data.data
-      imageUrl.value = 'http://127.0.0.1:3000/' + article.value.picture
-      toRaw(myQuillEditor.value).setHTML(article.value.detail)
+  if (id !== undefined) {
+    const { data: result } = await showMenuByIdApi(id)
+    if (result.statusCode === undefined) {
+      product.value = result
+      imageUrl.value = product.value.photo
+      toRaw(myQuillEditor.value).setHTML(product.value.description)
     }
   }
 })
 
-const uploadArticle = async () => {
+const uploadProduct = async () => {
   const regex = /<[^>]+>([\s\S]*?)<\/[^>]+>/g
-  const matches = article.value.detail.match(regex)
+  const matches = product.value.description.match(regex)
   if (matches == null) {
-    message.error('请填写完整')
+    message.error('请填写完整1')
     return
   }
-  article.value.type = type.value.value
-  if (article.value.title.trim() == '' || article.value.picture == null) {
+
+  if (!product.value.title.trim() || !imageUrl.value || !product.value.price) {
     message.error('请填写完整')
     return
   }
 
-  article.value.edit_timer = dayjs().format('YYYY/MM/DD HH:mm')
-
-  const result = await uploadArticleApi({ ...article.value })
-  if (result.data.code == 200) {
+  const { data: result } = await addMenuApi({ ...product.value, photo: imageUrl.value })
+  if (result.statusCode === undefined) {
     message.success('上传成功')
     setTimeout(() => {
-      router.push('/article/editarticle')
+      router.push('/product/editproduct')
     }, 1000)
   } else {
     message.error('上传失败')
   }
 }
 
-async function editArticle() {
-  // 提取标签内的内容
+async function editProduct() {
   const regex = /<[^>]+>([\s\S]*?)<\/[^>]+>/g
-  const matches = article.value.detail.match(regex)
+  const matches = product.value.description.match(regex)
   if (matches == null) {
-    message.error('请填写完整')
+    message.error('请填写完整1')
     return
   }
-  article.value.type = type.value.value
-  if (article.value.title.trim() == '' || article.value.picture == null) {
+
+  if (!product.value.title.trim() || !imageUrl.value || !product.value.price) {
     message.error('请填写完整')
     return
   }
 
-  const result = await updateArticleApi({ ...article.value })
-  if (result.data.code == 200) {
+  const { data: result } = await updateMenuApi(product.value.id, { ...product.value, photo: imageUrl.value })
+  if (result.statusCode === undefined) {
     message.success('修改成功')
     setTimeout(() => {
-      router.push('/article/editarticle')
+      router.push('/product/editproduct')
     }, 1000)
   } else {
-    message.error('修改失败')
+    message.error('上传失败')
   }
 }
 
@@ -122,7 +118,7 @@ const imgHandler = (state) => {
 }
 // 抛出更改内容，此处避免出错直接使用文档提供的getHTML方法
 const setValue = () => {
-  const text = toRaw(myQuillEditor.value).getHTML()
+  // const text = toRaw(myQuillEditor.value).getHTML()
 }
 
 function getBase64(img, callback) {
@@ -132,33 +128,20 @@ function getBase64(img, callback) {
 }
 
 const handleChange = (info) => {
-  if (info.file.status === 'uploading') {
-    loading.value = true
-    return
-  }
-  if (info.file.status === 'done') {
-    getBase64(info.file.originFileObj, (base64Url) => {
-      imageUrl.value = base64Url
-      loading.value = false
-    })
-    if (info.file.response.code == 200) {
-      article.value.picture = info.file.response.data
-    }
-  }
-  if (info.file.status === 'error') {
+  getBase64(info.file.originFileObj, (base64Url) => {
+    imageUrl.value = base64Url
     loading.value = false
-    message.error('upload error')
-  }
+  })
 }
 
 const beforeUpload = (file) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
   if (!isJpgOrPng) {
-    message.error('You can only upload JPG file!')
+    message.error('你只能上传 JPG 和 PNG 类型的图片')
   }
   const isLt2M = file.size / 1024 / 1024 < 2
   if (!isLt2M) {
-    message.error('Image must smaller than 2MB!')
+    message.error('图像不能超过2MB!')
   }
   return isJpgOrPng && isLt2M
 }
@@ -170,7 +153,7 @@ const beforeUpload = (file) => {
       <div style="margin-bottom: 20px">
         <span>菜品名字：</span>
         <a-input
-          v-model:value="article.title"
+          v-model:value="product.title"
           placeholder="请输入标题"
           style="width: 300px"
         />
@@ -178,10 +161,10 @@ const beforeUpload = (file) => {
       <div style="margin-bottom: 20px">
         <span>菜品单价：</span>
         <a-input-number
-          v-model:value="price"
+          addon-after="$"
+          v-model:value="product.price"
           precision="2"
-          :min="1"
-          :max="10"
+          :min="0"
         />
       </div>
       <a-form-item
@@ -190,11 +173,9 @@ const beforeUpload = (file) => {
       >
         <a-upload
           v-model:file-list="fileList"
-          name="file"
           list-type="picture-card"
           class="avatar-uploader"
           :show-upload-list="false"
-          action="/api/users/updatepicture?address=article"
           :before-upload="beforeUpload"
           @change="handleChange"
         >
@@ -215,14 +196,14 @@ const beforeUpload = (file) => {
     <a-button
       type="primary"
       style="margin-right: 10px"
-      @click="uploadArticle"
-      v-if="article.edit_timer == undefined"
+      @click="uploadProduct"
+      v-if="route.query.id === undefined"
       >上传菜品</a-button
     >
     <a-button
       type="primary"
       style="margin-right: 10px"
-      @click="editArticle"
+      @click="editProduct"
       v-else
       >修改菜品</a-button
     >
@@ -233,7 +214,7 @@ const beforeUpload = (file) => {
     <QuillEditor
       ref="myQuillEditor"
       theme="snow"
-      v-model:content="article.detail"
+      v-model:content="product.description"
       :options="data.editorOption"
       contentType="html"
       @update:content="setValue()"

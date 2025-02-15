@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-
-const addOpen = ref(false)
-const addProduct = ref({ name: '', sex: 1 })
+import { getMenuApi } from '@/api'
+import { showPersonApi, updateMenuStatusApi, deleteMenuApi } from '@/api'
+import { useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
 
 const columns = ref([
   {
@@ -17,19 +18,13 @@ const columns = ref([
   },
   {
     title: '菜名',
-    dataIndex: 'name',
-    key: 'name'
+    dataIndex: 'title',
+    key: 'title'
   },
   {
     title: '单价',
     dataIndex: 'price',
     key: 'price'
-  },
-  {
-    title: '详情',
-    dataIndex: 'detail',
-    key: 'detail',
-    ellipsis: true
   },
   {
     title: '状态',
@@ -42,47 +37,45 @@ const columns = ref([
     key: 'action'
   }
 ])
-
 const data = ref([])
 const search = ref()
 const originData = ref([])
+const router = useRouter()
 
 onMounted(async () => {
-  // const result = await showAllUserApi()
-  // if (result.data.code == 200) {
-  //   data.value = result.data.data
-  //   originData.value = [...data.value]
-  // }
-  data.value = [
-    {
-      id: '1010',
-      name: '张三',
-      price: 12.22,
-      phone: '182555550',
-      detail: '菜单详情，菜单详情，菜单详单详情，菜单详情菜单详情'
-    },
-    {
-      id: '1012',
-      name: '张四',
-      price: 18.58,
-      phone: '182555550',
-      detail: '菜单详情，菜单详情，菜单详单详情，菜单详情菜单详情'
-    }
-  ]
-
-  originData.value = [...data.value]
+  const { data: result } = await getMenuApi()
+  if (result.statusCode === undefined) {
+    data.value = result
+    originData.value = [...data.value]
+  }
 })
 
 const onSearch = () => {
   data.value = originData.value.filter((item) => {
     const searchValue = search.value
     const regex = new RegExp(searchValue, 'i')
-    return regex.test(item.name)
+    return regex.test(item.title)
   })
 }
 
-const handleStatus = (record) => {
-  console.log(record)
+const handleStatus = async (record) => {
+  const { data: result } = await updateMenuStatusApi(record.id, record.status)
+  if (result.statusCode === undefined) {
+    message.success('修改状态成功')
+  } else {
+    message.error('修改失败')
+  }
+}
+
+// 删除确认框
+const dismiss = async (id) => {
+  const { data: result } = await deleteMenuApi(id)
+  if (result.statusCode === undefined) {
+    data.value = data.value.filter((value) => value.id != id)
+    message.success('删除成功')
+  } else {
+    message.error('删除失败')
+  }
 }
 </script>
 
@@ -111,16 +104,20 @@ const handleStatus = (record) => {
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'pic'">
         <img
-          src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
+          :src="record.photo"
           class="w-[50px] h-[50px] object-cover"
         />
+      </template>
+
+      <template v-if="column.key === 'price'">
+        <span> ￥{{ record.price.toFixed(2) }} </span>
       </template>
 
       <template v-if="column.key === 'status'">
         <a-switch
           v-model:checked="record.status"
-          checked-children="发布"
-          un-checked-children="停售"
+          checked-children="上架"
+          un-checked-children="下架"
           @click="() => handleStatus(record)"
         />
       </template>
@@ -129,6 +126,7 @@ const handleStatus = (record) => {
         <a-button
           type="primary"
           style="margin-left: 20px"
+          @click="router.push(`/product/addproduct?id=${record.id}`)"
           >修改</a-button
         >
         <a-popconfirm
