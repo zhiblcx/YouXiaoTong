@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { UserOutlined, MoneyCollectOutlined } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
 import { onMounted, ref } from 'vue'
@@ -57,6 +57,9 @@ onMounted(() => {
       title: {
         text: '近七天营业额',
         left: 'center'
+      },
+      tooltip: {
+        trigger: 'item'
       },
       xAxis: {
         type: 'category',

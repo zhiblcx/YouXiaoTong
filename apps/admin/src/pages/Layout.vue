@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect } from 'vue'
+import { onMounted, ref, watchEffect } from 'vue'
 import {
   FileOutlined,
   UserOutlined,
@@ -17,6 +17,7 @@ import {
 import { useRouter, useRoute } from 'vue-router'
 import { useNicknameStore } from '@/stores/nickname'
 import screenfull from 'screenfull'
+import { showPersonApi } from '@/api'
 
 const store = useNicknameStore()
 const collapsed = ref(false)
@@ -26,6 +27,16 @@ const breadcrumbItem = ref([])
 const route = useRoute()
 const selectedKeys = ref([])
 const stateSpin = ref(false)
+
+onMounted(async () => {
+  const { data } = await showPersonApi()
+  if (data.statusCode === undefined) {
+    store.updateUserId(data.id)
+    if (data.account !== 'admin') {
+      store.updateName(data.name)
+    }
+  }
+})
 
 watchEffect(() => {
   selectedKeys.value = []
@@ -89,7 +100,41 @@ function fullScreen() {
         collapsible
       >
         <div class="logo" />
+
         <a-menu
+          v-if="store.nickname === '管理员'"
+          theme="light"
+          v-model:selectedKeys="selectedKeys"
+          @click="handleMenuClick"
+          mode="inline"
+        >
+          <a-menu-item key="home">
+            <BarChartOutlined />
+            <span>首页</span>
+          </a-menu-item>
+
+          <a-menu-item key="student">
+            <user-outlined />
+            <span>学生管理</span>
+          </a-menu-item>
+
+          <a-menu-item key="businesses">
+            <user-outlined />
+            <span>商家管理</span>
+          </a-menu-item>
+
+          <a-sub-menu key="article">
+            <template #title>
+              <file-outlined />
+              <span>校园头条</span>
+            </template>
+            <a-menu-item key="editarticle">文章编辑</a-menu-item>
+            <a-menu-item key="addarticle">添加文章</a-menu-item>
+          </a-sub-menu>
+        </a-menu>
+
+        <a-menu
+          v-else
           theme="light"
           v-model:selectedKeys="selectedKeys"
           @click="handleMenuClick"
@@ -124,37 +169,6 @@ function fullScreen() {
             <span>收费记录</span>
           </a-menu-item>
         </a-menu>
-
-        <!-- <a-menu
-          theme="light"
-          v-model:selectedKeys="selectedKeys"
-          @click="handleMenuClick"
-          mode="inline"
-        >
-          <a-menu-item key="home">
-            <BarChartOutlined />
-            <span>首页</span>
-          </a-menu-item>
-
-          <a-menu-item key="student">
-            <user-outlined />
-            <span>学生管理</span>
-          </a-menu-item>
-
-          <a-menu-item key="businesses">
-            <user-outlined />
-            <span>商家管理</span>
-          </a-menu-item>
-
-          <a-sub-menu key="article">
-            <template #title>
-              <file-outlined />
-              <span>校园头条</span>
-            </template>
-            <a-menu-item key="editarticle">文章编辑</a-menu-item>
-            <a-menu-item key="addarticle">添加文章</a-menu-item>
-          </a-sub-menu>
-        </a-menu> -->
       </a-layout-sider>
     </a-affix>
     <a-layout>

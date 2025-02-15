@@ -3,6 +3,7 @@ import { message } from 'ant-design-vue'
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginApi } from '../api'
+import LoginImg from '@/assets/background.png'
 const account = ref('')
 const password = ref('')
 const showLoginForm = ref(true)
@@ -15,68 +16,68 @@ watch(showLoginForm, () => {
 })
 
 async function login() {
-  if (account.value == '') {
-    return (errorMessage.value = '账号不能为空')
-  }
-  if (password.value == '') {
-    return (errorMessage.value = '密码不能为空')
-  }
+  if (account.value == '') return message.error('账号不能为空')
+  if (password.value == '') return message.error('密码不能为空')
+  if (type.value === '商家' && isNaN(Number(account.value))) return message.error('商家账号应为数字')
 
-  const data = await loginApi({ account: account.value, password: password.value })
-  if (data.data.code == 200) {
-    localStorage.setItem('token', data, data.data.token)
-    errorMessage.value = ''
-    router.push('/user')
+  const { data } = await loginApi({ account: account.value, password: password.value, type: type.value })
+  if (data.status === undefined) {
+    localStorage.setItem('token', data.access_token)
+    router.push('/')
     message.success('登录成功')
   } else {
-    message.error(data.data.message)
+    message.error(data.message)
   }
 }
 </script>
 
 <template>
-  <div style="background-image: url('src/assets/background.png')">
-    <div class="login-container animate__animated animate__backInDown">
-      <div
-        class="login-form"
-        style="background-color: hsla(0, 0%, 70%, 0.1)"
-        v-if="showLoginForm"
-      >
-        <h2 style="color: white">登录</h2>
-        <form>
-          <label>账号</label>
-          <input
-            type="text"
-            v-model.trim="account"
-            style="outline: none"
-          />
-          <label>密码</label>
-          <input
-            type="password"
-            v-model.trim="password"
-            style="outline: none"
-          />
-          <a-radio-group
-            v-model:value="type"
-            style="margin-top: 20px; display: flex; justify-content: center; align-items: center"
-          >
-            <a-radio value="商家">商家</a-radio>
-            <a-radio value="管理员">管理员</a-radio>
-          </a-radio-group>
-          <button
-            type="submit"
-            @click.prevent="login"
-          >
-            登录
-          </button>
-        </form>
-        <p
-          class="error-message"
-          v-if="errorMessage"
+  <div class="h-screen w-screen flex justify-center items-center absolute">
+    <img
+      :src="LoginImg"
+      class="object-center object-cover w-screen h-screen"
+    />
+  </div>
+  <div class="login-container animate__animated animate__backInDown">
+    <div
+      class="login-form"
+      style="background-color: hsla(0, 0%, 70%, 0.1)"
+      v-if="showLoginForm"
+    >
+      <h2 class="text-white text-xl">登录</h2>
+      <form>
+        <label>账号</label>
+        <input
+          type="text"
+          v-model.trim="account"
+          style="outline: none"
+        />
+        <label>密码</label>
+        <input
+          type="password"
+          v-model.trim="password"
+          style="outline: none"
+        />
+        <a-radio-group
+          v-model:value="type"
+          style="margin-top: 20px; display: flex; justify-content: center; align-items: center"
         >
-          {{ errorMessage }}
-        </p>
-      </div>
+          <a-radio value="商家">商家</a-radio>
+          <a-radio value="管理员">管理员</a-radio>
+        </a-radio-group>
+        <button
+          type="submit"
+          @click.prevent="login"
+        >
+          登录
+        </button>
+      </form>
+      <p
+        class="error-message"
+        v-if="errorMessage"
+      >
+        {{ errorMessage }}
+      </p>
     </div>
   </div>
 </template>
