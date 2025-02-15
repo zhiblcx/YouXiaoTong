@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import PersonInfoImg from '@/assets/images/person-info.png'
+import { ShowPersonApi } from '@/composables/auth'
+const { data } = await ShowPersonApi()
 </script>
 
 <template>
@@ -10,23 +12,23 @@ import PersonInfoImg from '@/assets/images/person-info.png'
   <van-cell-group class="mt-[250px]">
     <van-cell
       title="学号"
-      value="20250209"
+      :value="data?.id"
     />
     <van-cell
       title="姓名"
-      value="张三"
+      :value="data?.name"
     />
     <van-cell
       title="性别"
-      value="男"
+      :value="data?.sex"
     />
     <van-cell
       title="年龄"
-      value="18"
+      :value="data?.age"
     />
     <van-cell
       title="宿舍"
-      value="15栋405"
+      :value="data?.dormitory"
     />
   </van-cell-group>
 </template>
