@@ -2,16 +2,17 @@ enum TransactionType {
   水费
   电费
   食堂
+  充值
 }
 
 model Transaction {
   id         Int             @id @default(autoincrement())
   type       TransactionType
-  method     String
+  method     String?
   timer      DateTime        @default(now())
   money      Float
-  Student    Student?        @relation(fields: [studentId], references: [id])
-  studentId  Int?
+  Student    Student         @relation(fields: [studentId], references: [id])
+  studentId  Int
   Business   Business?       @relation(fields: [businessId], references: [id])
   businessId Int?
 }
