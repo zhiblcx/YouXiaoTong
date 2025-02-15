@@ -1,94 +1,53 @@
 <script setup lang="ts">
+import { GetAddressApi, UpdateAddressStatusApi } from '@/composables/address'
 const router = useRouter()
-const chosenAddressId = ref('1')
-const list = [
-  {
-    id: '1',
-    name: '张三',
-    tel: '13000000000',
-    address: '浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室',
-    isDefault: true
+const list = ref()
+const chosenAddressId = ref()
+
+const { data, status } = await GetAddressApi()
+
+watch(
+  status,
+  () => {
+    if (status.value === 'success') {
+      list.value = data.value.map((item: { isDefault: any; id: any; name: any; phone: any; detail: string }) => {
+        if (item.isDefault) {
+          chosenAddressId.value = item.id
+        }
+        return {
+          id: item.id,
+          name: item.name,
+          tel: item.phone,
+          address: '详细地址：' + item.detail,
+          isDefault: item.isDefault
+        }
+      })
+    }
   },
-  {
-    id: '2',
-    name: '李四',
-    tel: '1310000000',
-    address: '浙江省杭州市拱墅区莫干山路 50 号'
-  },
-  {
-    id: '3',
-    name: '张三',
-    tel: '13000000000',
-    address: '浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室',
-    isDefault: true
-  },
-  {
-    id: '4',
-    name: '李四',
-    tel: '1310000000',
-    address: '浙江省杭州市拱墅区莫干山路 50 号'
-  },
-  {
-    id: '5',
-    name: '张三',
-    tel: '13000000000',
-    address: '浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室',
-    isDefault: true
-  },
-  {
-    id: '6',
-    name: '李四',
-    tel: '1310000000',
-    address: '浙江省杭州市拱墅区莫干山路 50 号'
-  },
-  {
-    id: '7',
-    name: '张三',
-    tel: '13000000000',
-    address: '浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室',
-    isDefault: true
-  },
-  {
-    id: '8',
-    name: '李四',
-    tel: '1310000000',
-    address: '浙江省杭州市拱墅区莫干山路 50 号'
-  },
-  {
-    id: '9',
-    name: '张三',
-    tel: '13000000000',
-    address: '浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室',
-    isDefault: true
-  },
-  {
-    id: '10',
-    name: '李四',
-    tel: '1310000000',
-    address: '浙江省杭州市拱墅区莫干山路 50 号'
-  },
-  {
-    id: '11',
-    name: '张三',
-    tel: '13000000000',
-    address: '浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室',
-    isDefault: true
-  },
-  {
-    id: '12',
-    name: '李四',
-    tel: '1310000000',
-    address: '浙江省杭州市拱墅区莫干山路 50 号'
-  }
-]
+  { immediate: true }
+)
 
 const onAdd = () => {
-  showToast('新增地址')
   router.push('/setting/addresscontent')
 }
-const onEdit = (item, index) => {
-  showToast('编辑地址:' + index)
-  router.push('/setting/addresscontent?id=1')
+
+const onEdit = (item: { id: any }) => {
+  router.push(`/setting/addresscontent?id=${item.id}`)
+}
+
+const handleSelect = async (event: { isDefault: boolean; id: number }) => {
+  if (!event.isDefault) {
+    const { data } = await UpdateAddressStatusApi(event.id, true)
+    if (data.value.response === undefined) {
+      list.value.forEach((item: { isDefault: boolean }) => {
+        item.isDefault = false
+      })
+      event.isDefault = true
+      showSuccessToast('切换地址成功')
+    } else {
+      showFailToast('切换地址失败')
+    }
+  }
 }
 </script>
 
@@ -96,6 +55,8 @@ const onEdit = (item, index) => {
   <van-address-list
     v-model="chosenAddressId"
     :list="list"
+    default-tag-text="默认"
+    @select="handleSelect"
     @add="onAdd"
     @edit="onEdit"
   />
