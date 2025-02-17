@@ -2,15 +2,23 @@
 import { UserOutlined, MoneyCollectOutlined } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
 import { onMounted, ref } from 'vue'
+import { showSystemApi } from '@/api'
 
 const orderPie = ref()
 const saleLine = ref()
 const utilityPie = ref()
+const currentData = ref({})
 let orderPieChat
 let saleLineChat
 let utilityPieChat
 
-onMounted(() => {
+onMounted(async () => {
+  const { data: result } = await showSystemApi()
+  if (result.statusCode === undefined) {
+    currentData.value = result
+    console.log(result)
+  }
+
   if (orderPie.value) {
     if (orderPieChat) {
       orderPieChat.dispose()
@@ -33,13 +41,10 @@ onMounted(() => {
         {
           type: 'pie',
           radius: '50%',
-          data: [
-            { value: 1048, name: 'Search Engine' },
-            { value: 735, name: 'Direct' },
-            { value: 580, name: 'Email' },
-            { value: 484, name: 'Union Ads' },
-            { value: 300, name: 'Video Ads' }
-          ]
+          data: result.dishesSales.map((item) => ({
+            value: item.quantity,
+            name: item.title
+          }))
         }
       ]
     }
@@ -63,14 +68,14 @@ onMounted(() => {
       },
       xAxis: {
         type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        data: result.sevenDayMoney.map((item) => item.timer)
       },
       yAxis: {
         type: 'value'
       },
       series: [
         {
-          data: [150, 230, 224, 218, 135, 147, 260],
+          data: result.sevenDayMoney.map((item) => item.money),
           type: 'line'
         }
       ]
@@ -102,8 +107,8 @@ onMounted(() => {
           type: 'pie',
           radius: '50%',
           data: [
-            { value: 1048, name: 'Search Engine' },
-            { value: 735, name: 'Direct' }
+            { value: currentData.value?.waterTotal, name: '水费' },
+            { value: currentData.value?.lightningTotal, name: '电费' }
           ]
         }
       ]
@@ -122,7 +127,7 @@ onMounted(() => {
           <a-statistic
             class="w-[150px] h-[80px]"
             title="学生数量"
-            value="11"
+            :value="currentData?.studentCount"
           >
             <template #prefix> <UserOutlined /> </template>
           </a-statistic>
@@ -132,7 +137,7 @@ onMounted(() => {
           <a-statistic
             class="w-[150px] h-[80px]"
             title="商家数量"
-            value="11"
+            :value="currentData?.businessCount"
           >
             <template #prefix> <UserOutlined /> </template>
           </a-statistic>
@@ -142,7 +147,7 @@ onMounted(() => {
           <a-statistic
             class="w-[150px] h-[80px]"
             title="今天营业额"
-            value="11"
+            :value="currentData?.todayMoney"
           >
             <template #prefix> <MoneyCollectOutlined /> </template>
           </a-statistic>
