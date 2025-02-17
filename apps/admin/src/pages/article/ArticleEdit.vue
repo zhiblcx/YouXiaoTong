@@ -4,6 +4,7 @@ import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { getArticleApi, deleteArticleApi, updateArticleStatusApi } from '@/api'
+import dayjs from 'dayjs'
 
 const columns = ref([
   {
@@ -17,15 +18,20 @@ const columns = ref([
     key: 'picture'
   },
   {
-    title: '文章状态',
-    dataIndex: 'status',
-    key: 'status'
-  },
-  {
     title: '文章标题',
     dataIndex: 'title',
     key: 'title',
     ellipsis: true
+  },
+  {
+    title: '发布时间',
+    dataIndex: 'timer',
+    key: 'timer'
+  },
+  {
+    title: '文章状态',
+    dataIndex: 'status',
+    key: 'status'
   },
   {
     title: '操作',
@@ -103,6 +109,10 @@ const changeStatus = async (record) => {
             :src="record.photo"
           >
           </a-avatar>
+        </template>
+
+        <template v-if="column.key === 'timer'">
+          {{ dayjs(record.timer).format('YYYY-MM-DD HH:mm') }}
         </template>
 
         <template v-if="column.key === 'status'">
