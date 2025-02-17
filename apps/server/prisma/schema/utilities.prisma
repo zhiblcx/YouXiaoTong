@@ -1,7 +1,0 @@
-model Utilities {
-  id         Int      @id @default(autoincrement())
-  name       String
-  money      Float
-  business   Business @relation(fields: [businessId], references: [id])
-  businessId Int
-}

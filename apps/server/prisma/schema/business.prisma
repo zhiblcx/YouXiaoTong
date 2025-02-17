@@ -11,10 +11,7 @@ model Business {
   password    String
   type        BusinessType
   staff       Int
-  logwork     Float         @default(0.5)
-  wrap        Float         @default(0.5)
   menus       Menu[]
   transaction Transaction[]
-  utilities   Utilities[]
   orders      Order[]
 }

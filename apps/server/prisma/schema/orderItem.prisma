@@ -1,5 +1,6 @@
 model orderItem {
   id       Int    @id @default(autoincrement())
+  money    Float
   Order    Order? @relation(fields: [orderId], references: [id])
   orderId  Int?
   menu     Menu   @relation(fields: [menuId], references: [id])
