@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { showAllUserApi, deleteUserApi } from '../api'
+import { showBusinessTransactionApi } from '@/api'
+import dayjs from 'dayjs'
 
 const columns = ref([
   {
@@ -25,31 +26,12 @@ const columns = ref([
   }
 ])
 const data = ref([])
-const originData = ref([])
 
 onMounted(async () => {
-  // const result = await showAllUserApi()
-  // if (result.data.code == 200) {
-  //   data.value = result.data.data
-  //   originData.value = [...data.value]
-  // }
-  data.value = [
-    {
-      id: '1010',
-      money: 1.25,
-      method: '二维码',
-      timer: '2025/02/10 20:24'
-    },
-    {
-      id: '1012',
-      money: 1.25,
-      method: '堂食',
-      status: false,
-      timer: '2025/02/10 20:24'
-    }
-  ]
-
-  originData.value = [...data.value]
+  const { data: result } = await showBusinessTransactionApi()
+  if (result.statusCode === undefined) {
+    data.value = result
+  }
 })
 </script>
 
@@ -61,6 +43,12 @@ onMounted(async () => {
     <template #headerCell="{ column }">
       <template v-if="column.key === 'id'">
         <span> 编号 </span>
+      </template>
+    </template>
+
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.key === 'timer'">
+        {{ dayjs(record.timer).format('YYYY-MM-DD HH:mm') }}
       </template>
     </template>
   </a-table>
