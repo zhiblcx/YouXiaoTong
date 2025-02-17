@@ -20,8 +20,8 @@ export class CreateAddressDto {
   detail: string;
 
   @ApiProperty({
-    example: '详细地址',
-    description: '详细地址',
+    example: 'false',
+    description: '是否为默认地址',
   })
   isDefault?: boolean; // 是否为默认地址
 }
