@@ -2,63 +2,91 @@
 import PlusIcon from '@/assets/images/plus-icon.png'
 import MinusIcon from '@/assets/images/minus-icon.png'
 import ShoppingCarIcon from '@/assets/images/shopping-card-icon.png'
-import LoginImg from '@/assets/images/login.jpg'
+import { getBusinessApi, getMenuPublicByBusinessApi } from '@/composables/business'
+import { useShoppingCarStore } from '~/shared/store/shoppingCar'
+import { ShowPersonApi } from '~/composables/auth'
 
+const shoppingStore = useShoppingCarStore()
 const router = useRouter()
 const activeIndex = ref<number>(0)
-const show = ref(false)
+const show = ref<boolean>(false)
 const searchValue = ref()
 const checked = ref()
+const status = ref(0)
+const items = ref([])
+const goods = ref([])
+const shopping = ref(shoppingStore.shopping.flat())
+const { data: person } = await ShowPersonApi()
+const { data: business } = await getBusinessApi()
+const orderShow = ref<boolean>(false)
 
-const items = ref([
-  { text: '分组 1' },
-  { text: '分组 2' },
-  { text: '分组 2' },
-  { text: '分组 4' },
-  { text: '分组 5' },
-  { text: '分组 6' },
-  { text: '分组 7' },
-  { text: '分组 8' },
-  { text: '分组 9' },
-  { text: '分组 10' },
-  { text: '分组 11' },
-  { text: '分组 12' },
-  { text: '分组 13' },
-  { text: '分组 14' },
-  { text: '分组 15' },
-  { text: '分组 16' },
-  { text: '分组 17' },
-  { text: '分组 18' },
-  { text: '分组 19' }
-])
+watch(shoppingStore.shopping, () => {
+  if (shoppingStore.shopping !== undefined) {
+    shopping.value = shoppingStore.shopping?.flat()
+  }
+})
 
-const goods = ref([
-  { title: '商品1' },
-  { title: '商品2' },
-  { title: '商品3' },
-  { title: '商品4' },
-  { title: '商品5' },
-  { title: '商品6' },
-  { title: '商品7' },
-  { title: '商品8' },
-  { title: '商品9' },
-  { title: '商品10' },
-  { title: '商品11' },
-  { title: '商品12' },
-  { title: '商品13' },
-  { title: '商品14' },
-  { title: '商品15' },
-  { title: '商品16' },
-  { title: '商品17' },
-  { title: '商品18' },
-  { title: '商品19' }
-])
+watch(
+  business,
+  async () => {
+    items.value = business?.value?.map((item: any) => ({
+      ...item,
+      text: item.name
+    }))
+    if (items.value !== undefined) {
+      const { data } = await getMenuPublicByBusinessApi(items?.value[activeIndex.value].id)
+      goods.value = data.value
+      status.value = items?.value[activeIndex.value].status
+    }
+  },
+  { immediate: true }
+)
+
+watch(activeIndex, async () => {
+  const { data } = await getMenuPublicByBusinessApi(items?.value[activeIndex.value].id)
+  goods.value = data.value
+  status.value = items?.value[activeIndex.value].status
+})
 
 function onSearch() {}
 
 function onCancel() {}
 
-function onSubmit() {}
+function onSubmit() {
+  orderShow.value = true
+}
+
+function handleGoodDetail(id: any) {
+  if (status.value) {
+    router.push(`/takeaway/${id}`)
+  } else {
+    showFailToast('商家已打烊')
+  }
+}
+
+function handleMinus(item: any) {
+  if (item.quantity > 1) {
+    shoppingStore.minusShopping(item.businessId, item.id)
+  } else {
+    showFailToast('不能再减少了')
+  }
+}
+
+function handlePlus(item: any) {
+  if (item.quantity < 99) {
+    shoppingStore.plusShopping(item.businessId, item.id)
+  } else {
+    showSuccessToast('不能再增加了')
+  }
+}
+
+function handleDelete(item: any) {
+  // 找到商家id
+  // 找到商品id，然后进行删除
+  const businessId = item.businessId
+  const goodId = item.id
+  shoppingStore.deleteShopping(businessId, goodId)
+}
 </script>
 
 <template>
@@ -80,12 +108,18 @@ function onSubmit() {}
       <van-card
         v-for="item in goods"
         tag="热卖"
-        price="2.00"
-        desc="描述信息"
-        title="商品标题"
-        :thumb="LoginImg"
-        @click="router.push('/takeaway/1')"
+        :price="item.price.toFixed(2)"
+        :title="item.title"
+        :thumb="item.photo"
+        @click="handleGoodDetail(item.id)"
       >
+        <template #desc>
+          <div
+            v-html="item.description"
+            class="line-clamp-2"
+          />
+        </template>
+
         <template #footer>
           <van-button
             round
@@ -101,7 +135,8 @@ function onSubmit() {}
   </van-tree-select>
 
   <van-submit-bar
-    :price="3050"
+    v-if="status == 1"
+    :price="shoppingStore?.total"
     button-text="提交订单"
     @submit="onSubmit"
   >
@@ -110,6 +145,11 @@ function onSubmit() {}
       @click="show = true"
     />
   </van-submit-bar>
+
+  <van-submit-bar
+    v-if="status == 0"
+    button-text="打烊了"
+  />
 
   <van-action-sheet
     v-model:show="show"
@@ -121,38 +161,44 @@ function onSubmit() {}
       class="flex items-center"
     >
       <template #title>
-        <span class="line-clamp-2"
-          >地址：事实上事实上少时诵诗书是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒是撒"</span
+        <span
+          class="line-clamp-2"
+          @click="navigateTo('/setting/addresslist')"
         >
-      </template></van-cell
-    >
+          地址：{{ person?.Address[0]?.detail }}
+        </span>
+      </template>
+    </van-cell>
 
     <van-checkbox-group
       v-model="checked"
       shape="square"
       class="p-3"
-      v-for="item in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+      v-for="item in shopping"
     >
       <van-swipe-cell class="relative">
-        <van-checkbox
-          name="a"
-          class="absolute top-[40px] left-0 z-50"
-        />
         <van-card
           style="margin-left: 15px"
-          num="1"
-          price="2.00"
-          desc="描述信息2222222222222222222222222222222"
-          title="商品标题"
+          :num="item?.quantity"
+          :price="item?.price.toFixed(2)"
+          :title="item?.title"
           class="goods-card"
-          :thumb="LoginImg"
+          :thumb="item?.photo"
         >
+          <template #desc>
+            <div
+              v-html="item?.description"
+              class="line-clamp-2"
+            />
+          </template>
+
           <template #footer>
             <van-button
               round
               type="primary"
               size="mini"
               class="w-[25px]"
+              @click="handleMinus(item)"
             >
               <img :src="MinusIcon" />
             </van-button>
@@ -161,9 +207,11 @@ function onSubmit() {}
               type="primary"
               size="mini"
               class="w-[25px]"
+              @click="handlePlus(item)"
             >
-              <img :src="PlusIcon" /> </van-button
-          ></template>
+              <img :src="PlusIcon" />
+            </van-button>
+          </template>
         </van-card>
         <template #right>
           <van-button
@@ -171,11 +219,14 @@ function onSubmit() {}
             text="删除"
             type="danger"
             class="delete-button"
+            @click="handleDelete(item)"
           />
         </template>
       </van-swipe-cell>
     </van-checkbox-group>
   </van-action-sheet>
+
+  <order-popup v-model="orderShow" />
 </template>
 
 <style>
