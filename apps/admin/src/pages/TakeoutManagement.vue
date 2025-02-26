@@ -1,30 +1,47 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { message, notification } from 'ant-design-vue'
-import { showPersonApi } from '@/api'
+import { showPersonApi, showTransactionApi } from '@/api'
+import dayjs from 'dayjs'
 
 const text = ref(null)
 const show = ref(false)
-const qrcode = ref({
+const qrcode = ref()
+const qr = ref({
+  id: 0,
   businessId: '',
   money: 0
 })
+let timer = null
 
 onMounted(async () => {
   const { data: person } = await showPersonApi()
   if (person.statusCode === undefined) {
-    qrcode.value.businessId = person.id
+    qr.value.businessId = person.id
   }
 })
 
-watch(text, () => (show.value = false))
+watch(text, () => {
+  show.value = false
+  clearInterval(timer)
+  timer = null
+})
 
 const handleShow = () => {
   if (text.value) {
-    qrcode.value.money = text.value
+    qr.value.id = dayjs().valueOf()
+    qr.value.money = text.value
+    qrcode.value = JSON.stringify(qr.value)
     show.value = true
-    console.log(qrcode.value)
-    // openNotificationWithIcon(text.value)
+    timer = setInterval(async () => {
+      const { data: result } = await showTransactionApi(qr.value.id)
+      if (result.id === undefined) {
+        console.log('未付款')
+      } else {
+        openNotificationWithIcon(qr.value.money)
+        text.value = 0
+      }
+    }, 3000)
   } else {
     message.error('请填写交易金额')
   }

@@ -9,6 +9,7 @@ import { OrderModule } from './modules/order/order.module';
 import { OrderitemModule } from './modules/orderitem/orderitem.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { StudentModule } from './modules/student/student.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { StudentModule } from './modules/student/student.module';
     ArticleModule,
     OrderModule,
     OrderitemModule,
+    TransactionModule,
   ],
   controllers: [],
   providers: [],

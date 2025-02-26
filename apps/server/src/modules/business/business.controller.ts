@@ -6,9 +6,11 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Request,
 } from '@nestjs/common';
 import {
@@ -37,6 +39,40 @@ export class BusinessController {
   @Get('/order')
   async getOrderList(@Request() req) {
     return this.businessService.getOrderList(Number(req.user.userId));
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '获取商家交易列表' })
+  @Get('/transaction')
+  async getTransaction(@Request() req) {
+    return this.businessService.getTransaction(Number(req.user.userId));
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '获取商家菜单列表' })
+  @Get('/menu')
+  async getMenu(@Request() req) {
+    return this.businessService.getMenu(Number(req.user.userId));
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '查看系统信息' })
+  @Get('/system/:id')
+  showSystem(@Param('id', ParseIntPipe) id: number) {
+    return this.businessService.showSystem(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '修改商家状态' })
+  @Put('/status')
+  async updateStudentStatus(
+    @Request() req,
+    @Query('status', ParseBoolPipe) status: boolean,
+  ) {
+    return this.businessService.updateStudentStatus(
+      Number(req.user.userId),
+      status,
+    );
   }
 
   @HttpCode(HttpStatus.OK)

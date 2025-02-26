@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Request,
 } from '@nestjs/common';
 import {
@@ -38,6 +39,43 @@ export class StudentController {
   @Get('/order')
   async getOrderList(@Request() req) {
     return this.studentService.getOrderList(Number(req.user.userId));
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '获取学生交易记录' })
+  @Get('/transaction')
+  async getTransactionList(@Request() req) {
+    return this.studentService.getTransactionList(Number(req.user.userId));
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '学生充值' })
+  @Put('/recharge')
+  async recharge(@Request() req, @Query('money', ParseIntPipe) money: number) {
+    return this.studentService.recharge(Number(req.user.userId), money);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '学生缴纳水费' })
+  @Put('/recharge/water')
+  async rechargeWater(
+    @Request() req,
+    @Query('money', ParseIntPipe) money: number,
+  ) {
+    return this.studentService.rechargeWater(Number(req.user.userId), money);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '学生缴纳电费' })
+  @Put('/recharge/lightning')
+  async rechargeLightning(
+    @Request() req,
+    @Query('money', ParseIntPipe) money: number,
+  ) {
+    return this.studentService.rechargeLightning(
+      Number(req.user.userId),
+      money,
+    );
   }
 
   @HttpCode(HttpStatus.OK)

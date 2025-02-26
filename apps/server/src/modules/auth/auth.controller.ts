@@ -25,7 +25,6 @@ export class AuthController {
   @ApiOperation({ summary: '登录' })
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
-    console.log('有人要登录啦', signInDto);
     return this.authService.signIn(
       signInDto.account,
       signInDto.password,
@@ -45,5 +44,12 @@ export class AuthController {
   @Get()
   showPerson(@Request() req) {
     return this.authService.showPerson(req.user);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '查看系统信息' })
+  @Get('/system')
+  showSystem() {
+    return this.authService.showSystem();
   }
 }

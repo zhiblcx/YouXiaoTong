@@ -34,6 +34,9 @@ onMounted(async () => {
     store.updateUserId(data.id)
     if (data.account !== 'admin') {
       store.updateName(data.name)
+      store.updateType(data.type)
+    } else {
+      store.updateName('管理员')
     }
   }
 })
@@ -80,12 +83,17 @@ function refresh() {
 }
 
 function exitLogin() {
+  store.updateType('')
   router.push('/login')
   localStorage.removeItem('token')
 }
 
 function fullScreen() {
   screenfull.toggle()
+}
+
+function editPassword() {
+  router.push('/editpassword')
 }
 </script>
 
@@ -134,7 +142,7 @@ function fullScreen() {
         </a-menu>
 
         <a-menu
-          v-else
+          v-if="store.type === '食堂'"
           theme="light"
           v-model:selectedKeys="selectedKeys"
           @click="handleMenuClick"
@@ -162,6 +170,24 @@ function fullScreen() {
           <a-menu-item key="order">
             <MoneyCollectOutlined />
             <span>订单管理</span>
+          </a-menu-item>
+
+          <a-menu-item key="charge">
+            <TransactionOutlined />
+            <span>收费记录</span>
+          </a-menu-item>
+        </a-menu>
+
+        <a-menu
+          v-if="store.type === '水电'"
+          theme="light"
+          v-model:selectedKeys="selectedKeys"
+          @click="handleMenuClick"
+          mode="inline"
+        >
+          <a-menu-item key="home">
+            <BarChartOutlined />
+            <span>首页</span>
           </a-menu-item>
 
           <a-menu-item key="charge">
@@ -206,6 +232,14 @@ function fullScreen() {
               </span>
               <template #overlay>
                 <a-menu>
+                  <a-menu-item>
+                    <div
+                      style="color: #696b6f; font-size: 12px"
+                      @click="editPassword"
+                    >
+                      修改密码
+                    </div>
+                  </a-menu-item>
                   <a-menu-item>
                     <div
                       style="color: #696b6f; font-size: 12px"

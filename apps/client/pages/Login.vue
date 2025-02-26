@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import LoginImg from '@/assets/images/login.jpg'
+import { LoginApi } from '~/composables/auth'
 
 const account = ref('')
 const password = ref('')
+const router = useRouter()
 
-function onSubmit() {
-  console.log('onSubmit')
+async function onSubmit() {
+  const { data } = await LoginApi(account.value, password.value)
+  if (data.value.response === undefined) {
+    localStorage.setItem('token', data.value.access_token)
+    router.push('/')
+    showSuccessToast('登录成功')
+  } else {
+    showFailToast(data.value.message)
+  }
 }
 </script>
 

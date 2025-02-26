@@ -1,8 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
-import { addBusinessApi, getBusinessApi, updateBusinessApi, deleteBusinessApi } from '@/api'
+import { addBusinessApi, getBusinessApi, updateBusinessApi, deleteBusinessApi, showBusinessMenuApi } from '@/api'
+import { showBusinessSystemAPi } from '../api'
+import * as echarts from 'echarts'
 
 const options = ref([
   {
@@ -14,10 +16,41 @@ const options = ref([
     label: '水电'
   }
 ])
+const columns2 = ref([
+  {
+    title: '编号',
+    dataIndex: 'id',
+    key: 'id'
+  },
+  {
+    title: '图片',
+    dataIndex: 'pic',
+    key: 'pic'
+  },
+  {
+    title: '菜名',
+    dataIndex: 'title',
+    key: 'title'
+  },
+  {
+    title: '单价',
+    dataIndex: 'price',
+    key: 'price'
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status'
+  }
+])
 const addOpen = ref(false)
 const updateOpen = ref(false)
-const addBusiness = ref({ name: '', staff: '', phone: '', type: options.value[0] })
+const sevenTurnoverOpen = ref(false)
+const addBusiness = ref({ name: '', staff: '', phone: '', type: options.value[0].value })
 const updateBusiness = ref()
+const showMenuOpen = ref(false)
+const businessMenuData = ref([])
+const saleLine = ref()
 
 const columns = ref([
   {
@@ -59,6 +92,7 @@ const columns = ref([
 const businessData = ref([])
 const search = ref()
 const originData = ref([])
+let saleLineChat
 
 onMounted(async () => {
   initData()
@@ -104,22 +138,33 @@ const handlerAddSave = async () => {
   if (!business.name || !business.phone || !business.staff) {
     message.error('请填写完整')
   } else if (phoneRegex.test(business.phone)) {
+    if (businessData.value.find((item) => item.type === '水电')) {
+      return message.error('已经有水电商家了 ')
+    }
     const { data } = await addBusinessApi({
       name: business.name,
       phone: business.phone,
       staff: business.staff,
-      type: business.type.value
+      type: business.type
     })
     if (data.statusCode === undefined) {
       message.success('添加成功')
       addOpen.value = false
       await initData()
-      addBusiness.value = { name: '', staff: '', phone: '', type: options.value[0] }
+      addBusiness.value = { name: '', staff: '', phone: '', type: options.value[0].value }
     } else {
       message.error(data.message)
     }
   } else {
     message.error('请输入正确的手机号码')
+  }
+}
+
+const handleMenu = async (record) => {
+  showMenuOpen.value = true
+  const { data: result } = await showBusinessMenuApi(record.id)
+  if (result.statusCode === undefined) {
+    businessMenuData.value = result
   }
 }
 
@@ -145,6 +190,45 @@ const handleUpdateSave = async () => {
   } else {
     message.error('请输入正确的手机号码')
   }
+}
+
+const handleSevenTurnover = async (record) => {
+  sevenTurnoverOpen.value = true
+  const { data: result } = await showBusinessSystemAPi(record.id)
+
+  nextTick(() => {
+    if (saleLine.value) {
+      if (saleLineChat) {
+        saleLineChat.dispose()
+      }
+
+      saleLineChat = echarts.init(saleLine.value)
+      const option = {
+        title: {
+          text: '近七天营业额',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        xAxis: {
+          type: 'category',
+          data: result.sevenDayMoney?.map((item) => item.timer) ?? []
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: result.sevenDayMoney?.map((item) => item.money) ?? [],
+            type: 'line'
+          }
+        ]
+      }
+
+      option && saleLineChat.setOption(option)
+    }
+  })
 }
 </script>
 
@@ -186,12 +270,15 @@ const handleUpdateSave = async () => {
         <a-button
           type="primary"
           style="margin-left: 20px"
+          v-if="record.type !== '水电'"
+          @click="handleMenu(record)"
           >菜单</a-button
         >
         <a-button
           type="primary"
           style="margin-left: 20px"
-          >营业额</a-button
+          @click="handleSevenTurnover(record)"
+          >七天营业额</a-button
         >
         <a-button
           type="primary"
@@ -321,5 +408,51 @@ const handleUpdateSave = async () => {
         />
       </div>
     </div>
+  </a-modal>
+
+  <a-modal
+    v-model:open="showMenuOpen"
+    title="菜单"
+    style="text-align: center"
+  >
+    <template #footer> </template>
+    <a-table
+      :columns="columns2"
+      :data-source="businessMenuData"
+    >
+      <template #headerCell="{ column }">
+        <template v-if="column.key === 'id'">
+          <span> 编号 </span>
+        </template>
+      </template>
+
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'pic'">
+          <img
+            :src="record.photo"
+            class="w-[50px] h-[50px] object-cover"
+          />
+        </template>
+
+        <template v-if="column.key === 'price'">
+          <span> ￥{{ record.price.toFixed(2) }} </span>
+        </template>
+
+        <template v-if="column.key === 'status'">
+          {{ record.status ? '上架' : '下架' }}
+        </template>
+      </template>
+    </a-table>
+  </a-modal>
+
+  <a-modal
+    v-model:open="sevenTurnoverOpen"
+    style="text-align: center; width: 600px"
+  >
+    <template #footer> </template>
+    <div
+      ref="saleLine"
+      class="w-[600px] h-[400px]"
+    />
   </a-modal>
 </template>

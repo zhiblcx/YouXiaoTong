@@ -249,7 +249,7 @@ const handlerUpdate = async () => {
     <template #footer>
       <a-button
         key="back"
-        @click="addOpen = false"
+        @click="updateOpen = false"
       >
         取消
       </a-button>

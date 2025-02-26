@@ -10,3 +10,4 @@ export const rechargeApi = (money: number) => usePutRequest(`/student/recharge?m
 export const rechargeWaterApi = (money: number) => usePutRequest(`/student/recharge/water?money=${money}`, {})
 export const rechargeLightningApi = (money: number) => usePutRequest(`/student/recharge/lightning?money=${money}`, {})
 export const showTransactionApi = () => useGetRequest('/student/transaction', {}, Date.now().toString())
+export const showStudentOrderApi = () => useGetRequest('/student/order', {}, Date.now().toString())

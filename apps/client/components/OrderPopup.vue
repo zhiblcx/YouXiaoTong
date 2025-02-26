@@ -17,6 +17,9 @@ async function submit() {
     showFailToast('余额不够')
   } else {
     try {
+      if (person.value.Address.length === 0) {
+        return showFailToast('请选择收货地址')
+      }
       shoppingStore.shopping.forEach(async (item) => {
         const data = item.map((item2) => ({
           menuId: item2.id,
@@ -37,7 +40,6 @@ async function submit() {
       showSuccessToast('提交成功')
       router.replace('/setting/orderdetails')
     } catch (err) {
-      console.log(err)
       showFailToast('提交失败')
     }
   }

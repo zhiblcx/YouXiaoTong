@@ -57,6 +57,17 @@ const routes = [
     ]
   },
   {
+    path: '/editpassword',
+    component: Layout,
+    meta: { breadcrumb: '修改密码' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/pages/EditPassword.vue')
+      }
+    ]
+  },
+  {
     path: '/order',
     component: Layout,
     meta: { breadcrumb: '订单管理' },

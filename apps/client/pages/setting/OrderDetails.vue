@@ -36,6 +36,7 @@ const { data: orderList } = await showStudentOrderApi()
           type="primary"
           size="small"
           v-if="item.status !== '派送中'"
+          @click="navigateTo('/takeaway')"
         >
           再来一单
         </van-button>

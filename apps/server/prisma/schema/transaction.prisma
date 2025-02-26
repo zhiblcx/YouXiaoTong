@@ -6,7 +6,7 @@ enum TransactionType {
 }
 
 model Transaction {
-  id         Int             @id @default(autoincrement())
+  id         String          @id @default(uuid())
   type       TransactionType
   method     String?
   timer      DateTime        @default(now())

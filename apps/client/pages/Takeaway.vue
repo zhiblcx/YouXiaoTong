@@ -20,6 +20,8 @@ const { data: person } = await ShowPersonApi()
 const { data: business } = await getBusinessApi()
 const orderShow = ref<boolean>(false)
 
+const originData = ref([])
+
 watch(shoppingStore.shopping, () => {
   if (shoppingStore.shopping !== undefined) {
     shopping.value = shoppingStore.shopping?.flat()
@@ -29,13 +31,16 @@ watch(shoppingStore.shopping, () => {
 watch(
   business,
   async () => {
-    items.value = business?.value?.map((item: any) => ({
-      ...item,
-      text: item.name
-    }))
+    items.value = business?.value
+      ?.map((item: any) => ({
+        ...item,
+        text: item.name
+      }))
+      ?.filter((item) => item.type === '食堂')
     if (items.value !== undefined) {
       const { data } = await getMenuPublicByBusinessApi(items?.value[activeIndex.value].id)
       goods.value = data.value
+      originData.value = data.value
       status.value = items?.value[activeIndex.value].status
     }
   },
@@ -45,12 +50,17 @@ watch(
 watch(activeIndex, async () => {
   const { data } = await getMenuPublicByBusinessApi(items?.value[activeIndex.value].id)
   goods.value = data.value
+  originData.value = data.value
   status.value = items?.value[activeIndex.value].status
 })
 
-function onSearch() {}
+function onSearch() {
+  goods.value = originData.value.filter((item) => item.title.includes(searchValue.value))
+}
 
-function onCancel() {}
+function onCancel() {
+  goods.value = originData.value
+}
 
 function onSubmit() {
   orderShow.value = true
@@ -99,6 +109,7 @@ function handleDelete(item: any) {
       @cancel="onCancel"
     />
   </form>
+
   <van-tree-select
     v-model:main-active-index="activeIndex"
     class="min-h-screen mb-12"
@@ -107,7 +118,6 @@ function handleDelete(item: any) {
     <template #content>
       <van-card
         v-for="item in goods"
-        tag="热卖"
         :price="item.price.toFixed(2)"
         :title="item.title"
         :thumb="item.photo"

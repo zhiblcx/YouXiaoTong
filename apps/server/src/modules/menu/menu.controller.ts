@@ -6,9 +6,11 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Request,
 } from '@nestjs/common';
 import {
@@ -27,9 +29,45 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '获取菜品列表' })
-  @Get()
-  async getMenuList(@Request() req) {
-    return this.menuService.getMenuList(req.user.userId);
+  @Get('/business/:id')
+  async getMenuList(@Param('id', ParseIntPipe) id: number) {
+    return this.menuService.getMenuList(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '获取商家公开菜品' })
+  @Get('/public/:id')
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    example: 1,
+    description: '商家id',
+  })
+  async getMenuListByBusinessId(@Param('id', ParseIntPipe) id: number) {
+    return this.menuService.getMenuListByBusinessId(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '获取指定菜品' })
+  @Get(':id')
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    example: 1,
+    description: '菜品id',
+  })
+  async getMenuById(@Param('id', ParseIntPipe) id: number) {
+    return this.menuService.getMenuById(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '修改菜品状态' })
+  @Put('/status/:id')
+  async updateMenuStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('status', ParseBoolPipe) status: boolean,
+  ) {
+    return this.menuService.updateMenuStatus(id, status);
   }
 
   @HttpCode(HttpStatus.OK)

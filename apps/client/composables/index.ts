@@ -15,7 +15,7 @@ export const useServerRequest = <T = any>(url: string, opts: UseFetchOptions<T> 
       }
     },
     onResponse({ response }) {
-      console.log(response, 'response')
+      // console.log(response, 'response')
     }
   }
 

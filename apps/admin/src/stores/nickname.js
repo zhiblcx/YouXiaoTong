@@ -2,8 +2,9 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useNicknameStore = defineStore('nickname', () => {
-  const nickname = ref('管理员')
+  const nickname = ref()
   const userId = ref()
+  const type = ref()
   function updateName(newNickname) {
     nickname.value = newNickname
   }
@@ -11,5 +12,9 @@ export const useNicknameStore = defineStore('nickname', () => {
     userId.value = id
   }
 
-  return { nickname, userId, updateName, updateUserId }
+  function updateType(value) {
+    type.value = value
+  }
+
+  return { nickname, userId, type, updateName, updateUserId, updateType }
 })

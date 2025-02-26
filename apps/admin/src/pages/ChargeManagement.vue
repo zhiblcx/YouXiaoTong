@@ -10,6 +10,11 @@ const columns = ref([
     key: 'id'
   },
   {
+    title: '类型',
+    dataIndex: 'type',
+    key: 'type'
+  },
+  {
     title: '消费',
     dataIndex: 'money',
     key: 'money'
@@ -49,6 +54,10 @@ onMounted(async () => {
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'timer'">
         {{ dayjs(record.timer).format('YYYY-MM-DD HH:mm') }}
+      </template>
+
+      <template v-if="column.key === 'money'">
+        {{ record.money.toFixed(2) }}
       </template>
     </template>
   </a-table>

@@ -2,21 +2,34 @@
 import { UserOutlined, MoneyCollectOutlined } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
 import { onMounted, ref } from 'vue'
-import { showSystemApi } from '@/api'
+import { showSystemApi, showPersonApi, showBusinessSystemAPi } from '@/api'
 
 const orderPie = ref()
 const saleLine = ref()
 const utilityPie = ref()
 const currentData = ref({})
+const currentPerson = ref({})
 let orderPieChat
 let saleLineChat
 let utilityPieChat
 
 onMounted(async () => {
-  const { data: result } = await showSystemApi()
-  if (result.statusCode === undefined) {
-    currentData.value = result
-    console.log(result)
+  const { data: person } = await showPersonApi()
+  if (person.statusCode === undefined) {
+    currentPerson.value = person
+    console.log(person)
+    if (person.type != null) {
+      // 水电 和 食堂商家
+      const { data: result } = await showBusinessSystemAPi(person.id)
+      currentData.value = result
+      console.log(result)
+    } else {
+      // 管理员
+      const { data: result } = await showSystemApi()
+      if (result.statusCode === undefined) {
+        currentData.value = result
+      }
+    }
   }
 
   if (orderPie.value) {
@@ -41,10 +54,11 @@ onMounted(async () => {
         {
           type: 'pie',
           radius: '50%',
-          data: result.dishesSales.map((item) => ({
-            value: item.quantity,
-            name: item.title
-          }))
+          data:
+            currentData.value.dishesSales?.map((item) => ({
+              value: item.quantity,
+              name: item.title
+            })) ?? []
         }
       ]
     }
@@ -68,14 +82,14 @@ onMounted(async () => {
       },
       xAxis: {
         type: 'category',
-        data: result.sevenDayMoney.map((item) => item.timer)
+        data: currentData.value.sevenDayMoney?.map((item) => item.timer) ?? []
       },
       yAxis: {
         type: 'value'
       },
       series: [
         {
-          data: result.sevenDayMoney.map((item) => item.money),
+          data: currentData.value.sevenDayMoney?.map((item) => item.money) ?? [],
           type: 'line'
         }
       ]
@@ -107,8 +121,8 @@ onMounted(async () => {
           type: 'pie',
           radius: '50%',
           data: [
-            { value: currentData.value?.waterTotal, name: '水费' },
-            { value: currentData.value?.lightningTotal, name: '电费' }
+            { value: currentData.value?.waterTotal ?? 0, name: '水费' },
+            { value: currentData.value?.lightningTotal ?? 0, name: '电费' }
           ]
         }
       ]
@@ -123,7 +137,10 @@ onMounted(async () => {
   <div class="flex">
     <div class="w-[50%]">
       <div class="flex justify-around h-[130px]">
-        <a-card class="shadow-xl">
+        <a-card
+          class="shadow-xl"
+          v-if="currentPerson.account === 'admin'"
+        >
           <a-statistic
             class="w-[150px] h-[80px]"
             title="学生数量"
@@ -133,7 +150,10 @@ onMounted(async () => {
           </a-statistic>
         </a-card>
 
-        <a-card class="shadow-xl">
+        <a-card
+          class="shadow-xl"
+          v-if="currentPerson.account === 'admin'"
+        >
           <a-statistic
             class="w-[150px] h-[80px]"
             title="商家数量"
@@ -160,12 +180,14 @@ onMounted(async () => {
         />
       </div>
     </div>
-    <a-card>
+    <a-card class="flex items-end">
       <div
+        v-if="currentPerson?.account === 'admin' || currentPerson.type === '食堂'"
         ref="orderPie"
         class="w-[600px] h-[300px]"
       />
       <div
+        v-if="currentPerson?.account === 'admin' || currentPerson.type === '水电'"
         ref="utilityPie"
         class="w-[600px] h-[300px]"
       />

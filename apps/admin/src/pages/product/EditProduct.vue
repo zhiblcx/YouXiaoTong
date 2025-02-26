@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { getMenuApi } from '@/api'
-import { showPersonApi, updateMenuStatusApi, deleteMenuApi } from '@/api'
+import { showPersonApi, updateBusinessStatusApi, updateMenuStatusApi, deleteMenuApi } from '@/api'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 
@@ -41,14 +41,23 @@ const data = ref([])
 const search = ref()
 const originData = ref([])
 const router = useRouter()
+const person = ref({ status: false })
 
 onMounted(async () => {
+  initData()
+})
+
+const initData = async () => {
   const { data: result } = await getMenuApi()
+  const { data: personResult } = await await showPersonApi()
   if (result.statusCode === undefined) {
     data.value = result
     originData.value = [...data.value]
   }
-})
+  if (personResult.statusCode === undefined) {
+    person.value = personResult
+  }
+}
 
 const onSearch = () => {
   data.value = originData.value.filter((item) => {
@@ -77,6 +86,15 @@ const dismiss = async (id) => {
     message.error('删除失败')
   }
 }
+
+const handleBusinessStatus = async (checked) => {
+  const { data: result } = await updateBusinessStatusApi(checked)
+  if (result.statusCode === undefined) {
+    message.success('修改店铺状态成功')
+  } else {
+    message.error('修改店铺状态失败')
+  }
+}
 </script>
 
 <template>
@@ -89,6 +107,16 @@ const dismiss = async (id) => {
       @search="onSearch"
       style="margin-bottom: 5px; width: 300px"
     />
+
+    <div>
+      店铺状态：
+      <a-switch
+        v-model:checked="person.status"
+        checked-children="开业"
+        un-checked-children="打烊"
+        @click="handleBusinessStatus"
+      />
+    </div>
   </div>
 
   <a-table

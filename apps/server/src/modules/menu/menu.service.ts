@@ -6,8 +6,22 @@ import { CreateMenuDto } from './dto/create-menu.dto';
 export class MenuService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getMenuList(id) {
-    return await this.prisma.menu.findMany({ where: { id } });
+  async getMenuList(id: number) {
+    return await this.prisma.menu.findMany({ where: { businessId: id } });
+  }
+
+  async getMenuListByBusinessId(id: number) {
+    return await this.prisma.menu.findMany({
+      where: { businessId: id, status: true },
+    });
+  }
+
+  async getMenuById(id: number) {
+    return await this.prisma.menu.findUnique({ where: { id } });
+  }
+
+  async updateMenuStatus(id: number, status: boolean) {
+    return await this.prisma.menu.update({ where: { id }, data: { status } });
   }
 
   async updateMenu(id, updateMenuDto: CreateMenuDto) {

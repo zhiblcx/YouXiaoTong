@@ -18,4 +18,10 @@ export class CreateArticleDto {
     description: '文章内容',
   })
   content: string;
+
+  @ApiProperty({
+    example: true,
+    description: '文章状态',
+  })
+  status: boolean;
 }
