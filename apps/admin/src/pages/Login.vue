@@ -63,6 +63,7 @@ async function login() {
           style="margin-top: 20px; display: flex; justify-content: center; align-items: center"
         >
           <a-radio value="商家">商家</a-radio>
+          <a-radio value="运输员">运输员</a-radio>
           <a-radio value="管理员">管理员</a-radio>
         </a-radio-group>
         <button
