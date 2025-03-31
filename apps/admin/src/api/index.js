@@ -12,6 +12,12 @@ export const getStudentApi = () => request.get('/student')
 export const updateStudentApi = (id, data) => request.put(`/student/${id}`, data)
 export const deleteStudentApi = (id) => request.delete(`/student/${id}`)
 
+// 运输员
+export const addTransporterApi = (data) => request.post('/transporter', data)
+export const getTransporterApi = () => request.get('/transporter')
+export const updateTransporterApi = (id, data) => request.put(`/transporter/${id}`, data)
+export const deleteTransporterApi = (id) => request.delete(`/transporter/${id}`)
+
 // 商家
 export const addBusinessApi = (data) => request.post('/business', data)
 export const getBusinessApi = () => request.get('/business')
@@ -44,3 +50,8 @@ export const updateOrderStatus = (id, status) => request.put(`/order/status/${id
 
 // 账单
 export const showTransactionApi = (id) => request.get(`/transaction/${id}`)
+
+export const addSpeciesApi = (data) => request.post('/species', data)
+export const getSpeciesApi = () => request.get('/species')
+export const updateSpeciesApi = (id, data) => request.put(`/species/${id}`, data)
+export const deleteSpeciesApi = (id) => request.delete(`/species/${id}`)

@@ -29,6 +29,17 @@ const routes = [
     ]
   },
   {
+    path: '/transporter',
+    component: Layout,
+    meta: { breadcrumb: '运输员管理' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/pages/TransporterManagement.vue')
+      }
+    ]
+  },
+  {
     path: '/student',
     component: Layout,
     meta: { breadcrumb: '学生管理' },
@@ -36,6 +47,28 @@ const routes = [
       {
         path: '',
         component: () => import('@/pages/StudentManagement.vue')
+      }
+    ]
+  },
+  {
+    path: '/species',
+    component: Layout,
+    meta: { breadcrumb: '商品种类管理' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/pages/SpeciesManagement.vue')
+      }
+    ]
+  },
+  {
+    path: '/inventory',
+    component: Layout,
+    meta: { breadcrumb: '出入库申请' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/pages/InventoryRequest.vue')
       }
     ]
   },

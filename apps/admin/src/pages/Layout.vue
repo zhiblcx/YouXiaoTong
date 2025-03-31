@@ -12,7 +12,9 @@ import {
   SyncOutlined,
   ExpandOutlined,
   BarChartOutlined,
-  TransactionOutlined
+  TransactionOutlined,
+  GoldOutlined,
+  TagsOutlined
 } from '@ant-design/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useNicknameStore } from '@/stores/nickname'
@@ -33,6 +35,7 @@ onMounted(async () => {
   if (data.statusCode === undefined) {
     store.updateUserId(data.id)
     if (data.account !== 'admin') {
+      console.log(data)
       store.updateName(data.name)
       store.updateType(data.type)
     } else {
@@ -126,9 +129,19 @@ function editPassword() {
             <span>学生管理</span>
           </a-menu-item>
 
+          <a-menu-item key="transporter">
+            <user-outlined />
+            <span>运输员管理</span>
+          </a-menu-item>
+
           <a-menu-item key="businesses">
             <user-outlined />
             <span>商家管理</span>
+          </a-menu-item>
+
+          <a-menu-item key="species">
+            <TagsOutlined />
+            <span>商品种类管理</span>
           </a-menu-item>
 
           <a-sub-menu key="article">
@@ -172,9 +185,27 @@ function editPassword() {
             <span>订单管理</span>
           </a-menu-item>
 
+          <a-menu-item key="species">
+            <TagsOutlined />
+            <span>商品种类管理</span>
+          </a-menu-item>
+
           <a-menu-item key="charge">
             <TransactionOutlined />
             <span>收费记录</span>
+          </a-menu-item>
+        </a-menu>
+
+        <a-menu
+          v-if="store.type === '运输员'"
+          theme="light"
+          v-model:selectedKeys="selectedKeys"
+          @click="handleMenuClick"
+          mode="inline"
+        >
+          <a-menu-item key="inventory">
+            <GoldOutlined />
+            <span>出入库申请</span>
           </a-menu-item>
         </a-menu>
 
