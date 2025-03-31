@@ -8,8 +8,10 @@ import { MenuModule } from './modules/menu/menu.module';
 import { OrderModule } from './modules/order/order.module';
 import { OrderitemModule } from './modules/orderitem/orderitem.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
+import { SpeciesModule } from './modules/species/species.module';
 import { StudentModule } from './modules/student/student.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
+import { TransporterModule } from './modules/transporter/transporter.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { TransactionModule } from './modules/transaction/transaction.module';
     OrderModule,
     OrderitemModule,
     TransactionModule,
+    TransporterModule,
+    SpeciesModule,
   ],
   controllers: [],
   providers: [],

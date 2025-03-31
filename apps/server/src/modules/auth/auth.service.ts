@@ -27,6 +27,11 @@ export class AuthService {
         user = await this.prisma.admin.findUnique({
           where: { account },
         });
+        break;
+      case authType.TRANSPORTER:
+        user = await this.prisma.transporter.findUnique({
+          where: { id: Number(account) },
+        });
     }
     if (user?.password !== pass || user === null) {
       return new UnauthorizedException('账号或者密码错误');
@@ -92,6 +97,14 @@ export class AuthService {
         return await this.prisma.admin.findUnique({
           where: { id: Number(user.userId) },
         });
+      }
+      case authType.TRANSPORTER: {
+        return {
+          ...(await this.prisma.transporter.findUnique({
+            where: { id: Number(user.userId) },
+          })),
+          type: authType.TRANSPORTER,
+        };
       }
       case authType.STUDENT: {
         return await this.prisma.student.findUnique({

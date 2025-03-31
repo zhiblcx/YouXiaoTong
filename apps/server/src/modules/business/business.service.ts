@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BusinessType } from '@prisma/client';
+import { defaultPassword } from '../auth/constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBusinessDto } from './dto/create-business.dto';
 
@@ -186,7 +187,7 @@ export class BusinessService {
         staff: createStudentDto.staff,
         type: createStudentDto.type as BusinessType,
         status: createStudentDto.type === '水电',
-        password: '123456',
+        password: defaultPassword,
       },
     });
   }

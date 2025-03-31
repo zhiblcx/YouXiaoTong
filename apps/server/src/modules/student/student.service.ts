@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { defaultPassword } from '../auth/constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 
@@ -148,7 +149,7 @@ export class StudentService {
         age: createStudentDto.age,
         sex: createStudentDto.sex,
         dormitory: createStudentDto.dormitory,
-        password: '123456',
+        password: defaultPassword,
       },
     });
   }
