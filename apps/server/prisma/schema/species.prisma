@@ -1,0 +1,5 @@
+model Species {
+  id    Int     @id @default(autoincrement())
+  label String
+  Stock Stock[]
+}

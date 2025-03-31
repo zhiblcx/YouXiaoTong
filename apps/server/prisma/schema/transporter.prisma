@@ -1,0 +1,9 @@
+model Transporter {
+  id          Int           @id @default(autoincrement())
+  name        String
+  phone       String
+  password    String
+  Stock       Stock[]
+  application Application[]
+  isDelete    Boolean       @default(false)
+}

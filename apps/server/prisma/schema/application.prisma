@@ -1,0 +1,8 @@
+model Application {
+  id            Int          @id @default(autoincrement())
+  Stock         Stock[]
+  type          String
+  status        Int
+  Transporter   Transporter? @relation(fields: [transporterId], references: [id])
+  transporterId Int?
+}
