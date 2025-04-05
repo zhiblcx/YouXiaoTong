@@ -55,3 +55,13 @@ export const addSpeciesApi = (data) => request.post('/species', data)
 export const getSpeciesApi = () => request.get('/species')
 export const updateSpeciesApi = (id, data) => request.put(`/species/${id}`, data)
 export const deleteSpeciesApi = (id) => request.delete(`/species/${id}`)
+
+export const addApplicationApi = (data) => request.post('/application', data)
+export const updateApplicationApi = (id, status) => request.put(`/application/${id}`, { status })
+export const getApplicationBusinessApi = () => request.get('/application/business')
+export const getApplicationTransporterApi = () => request.get(`/application/transporter`)
+
+export const addStockApi = (data) => request.post('/stock', data)
+export const updateStockApi = (id, data) => request.put(`/stock/${id}`, data)
+export const getStockApi = () => request.get('/stock')
+export const getAllStockApi = () => request.get(`/stock/all`)

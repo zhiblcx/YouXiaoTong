@@ -1,15 +1,16 @@
 model Stock {
-  id            Int         @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   goodName      String
-  stockName     String
   startTime     DateTime
   endTime       DateTime
-  business      Business    @relation(fields: [businessId], references: [id])
-  transporter   Transporter @relation(fields: [transporterId], references: [id])
-  species       Species     @relation(fields: [speciesId], references: [id], onDelete: Cascade)
+  num           Int
+  business      Business     @relation(fields: [businessId], references: [id])
+  transporter   Transporter  @relation(fields: [transporterId], references: [id])
+  species       Species      @relation(fields: [speciesId], references: [id], onDelete: Cascade)
   speciesId     Int
   transporterId Int
   businessId    Int
-  application   Application @relation(fields: [applicationId], references: [id])
-  applicationId Int
+  Application   Application? @relation(fields: [applicationId], references: [id])
+  applicationId Int?
+  status        Boolean      @default(false)
 }

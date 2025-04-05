@@ -1,117 +1,118 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
-import { addTransporterApi, getTransporterApi, updateTransporterApi, deleteTransporterApi } from '@/api'
+import { addApplicationApi, getApplicationTransporterApi, getBusinessApi, getSpeciesApi, addStockApi } from '@/api'
+import dayjs from 'dayjs'
+
+const options = ref([])
+const options2 = ref([])
 const addOpen = ref(false)
-const updateOpen = ref(false)
-const addTransporter = ref({ name: '', phone: '' })
-const updateTransporter = ref()
+const addInventory = ref({ stockName: '', num: '', type: '入库' })
 const columns = ref([
   {
-    title: '运输员编号',
+    title: '申请号',
     dataIndex: 'id',
     key: 'id'
   },
   {
-    title: '姓名',
-    dataIndex: 'name',
-    key: 'name'
+    title: '商品名称',
+    dataIndex: 'goodName',
+    key: 'goodName'
   },
   {
-    title: '手机号码',
-    dataIndex: 'phone',
-    key: 'phone'
+    title: '数量',
+    dataIndex: 'num',
+    key: 'num'
   },
   {
-    title: '操作',
-    dataIndex: 'action',
-    key: 'action'
+    title: '开始时间',
+    dataIndex: 'startTime',
+    key: 'startTime'
+  },
+  {
+    title: '结束时间',
+    dataIndex: 'endTime',
+    key: 'endTime'
+  },
+  {
+    title: '出入库',
+    dataIndex: 'type',
+    key: 'type'
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status'
   }
 ])
-const transporterData = ref([])
+const inventoryData = ref([])
 const search = ref()
 const originData = ref([])
 
 onMounted(async () => {
+  const { data } = await getBusinessApi()
+  const { data: data2 } = await getSpeciesApi()
+  if (data.status === undefined) {
+    options.value = data.map((item) => ({
+      value: item.id,
+      label: item.id
+    }))
+  }
+
+  if (data2.status === undefined) {
+    options2.value = data2.map((item) => ({
+      value: item.id,
+      label: item.label
+    }))
+  }
   initData()
 })
 
 const initData = async () => {
-  const { data } = await getTransporterApi()
+  const { data } = await getApplicationTransporterApi()
   if (data.status === undefined) {
-    transporterData.value = data
-    originData.value = [...transporterData.value]
+    inventoryData.value = data.reverse()
+    inventoryData.value = Array.isArray(data) ? data : []
+    originData.value = [...inventoryData.value]
   }
 }
 
 const onSearch = () => {
-  transporterData.value = originData.value.filter((item) => {
+  inventoryData.value = originData.value.filter((item) => {
     const searchValue = search.value
     const regex = new RegExp(searchValue, 'i')
-    return regex.test(item.name)
+    return regex.test(item.id)
   })
 }
 
-const handleUpdate = (record) => {
-  updateTransporter.value = { ...record }
-  updateOpen.value = true
-}
-
-// 删除确认框
-const dismiss = async (id) => {
-  const { data } = await deleteTransporterApi(id)
-  if (data.statusCode === undefined) {
-    transporterData.value = transporterData.value.filter((value) => value.id != id)
-    message.success('删除成功')
-  } else {
-    message.error('删除失败')
-  }
-}
-
-// 添加运输员
+// 添加申请
 const handlerAddSave = async () => {
-  const phoneRegex = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
-  const transporter = addTransporter.value
-  if (!transporter.name || !transporter.phone) {
+  const inventory = addInventory.value
+  if (!inventory.stockName || !inventory.num || !inventory.businessId || !inventory.species || !inventory.timer) {
     message.error('请填写完整')
-  } else if (phoneRegex.test(transporter.phone)) {
-    const { data } = await addTransporterApi({
-      name: transporter.name,
-      phone: transporter.phone
+  } else {
+    const { data } = await addStockApi({
+      goodName: inventory.stockName,
+      num: inventory.num,
+      businessId: inventory.businessId,
+      speciesId: inventory.species,
+      startTime: new Date(inventory.timer[0].$d),
+      endTime: new Date(inventory.timer[1].$d)
     })
     if (data.statusCode === undefined) {
-      message.success('添加成功')
-      addOpen.value = false
-      await initData()
-      addTransporter.value = { name: '', phone: '' }
-    } else {
-      message.error(data.message)
+      const { data: data2 } = await addApplicationApi({
+        stockId: data.id,
+        type: inventory.type
+      })
+      if (data2.statusCode === undefined) {
+        message.success('添加成功')
+        addOpen.value = false
+        await initData()
+        addInventory.value = { stockName: '', num: '', businessId: undefined, species: undefined, timer: undefined }
+      } else {
+        message.error(data.message)
+      }
     }
-  } else {
-    message.error('请输入正确的手机号码')
-  }
-}
-
-const handleUpdateSave = async () => {
-  const phoneRegex = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
-  const transporter = updateTransporter.value
-  if (!transporter.name || !transporter.phone) {
-    message.error('请填写完整')
-  } else if (phoneRegex.test(transporter.phone)) {
-    const { data } = await updateTransporterApi(transporter.id, {
-      name: transporter.name,
-      phone: transporter.phone
-    })
-    if (data.statusCode === undefined) {
-      message.success('修改成功')
-      updateOpen.value = false
-      await initData()
-    } else {
-      message.error(data.message)
-    }
-  } else {
-    message.error('请输入正确的手机号码')
   }
 }
 </script>
@@ -120,7 +121,7 @@ const handleUpdateSave = async () => {
   <div style="margin-bottom: 10px; display: flex; justify-content: space-between">
     <a-input-search
       v-model:value="search"
-      placeholder="请输入姓名"
+      placeholder="请输入编号"
       enter-button="搜索"
       size="large"
       @search="onSearch"
@@ -129,49 +130,54 @@ const handleUpdateSave = async () => {
     <a-button
       type="primary"
       @click="addOpen = true"
-      >添加运输员</a-button
+      >添加申请</a-button
     >
   </div>
 
   <a-table
     :columns="columns"
-    :data-source="transporterData"
+    :data-source="inventoryData"
   >
     <template #headerCell="{ column }">
       <template v-if="column.key === 'id'">
-        <span> 运输员工编号 </span>
+        <span> 申请编号 </span>
       </template>
     </template>
 
     <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'action'">
-        <a-button
-          type="primary"
-          style="margin-left: 20px"
-          @click="handleUpdate(record)"
-          >修改</a-button
-        >
-        <a-popconfirm
-          title="确认删除吗?"
-          ok-text="删除"
-          cancel-text="取消"
-          @confirm="dismiss(record.id)"
-        >
-          <template #icon><question-circle-outlined style="color: red" /></template>
-          <a-button
-            type="primary"
-            danger
-            style="margin-left: 20px"
-            >删除</a-button
-          >
-        </a-popconfirm>
+      <template v-if="column.key === 'type'">
+        <a-tag :color="record.type === '入库' ? 'green' : 'red'">
+          {{ record.type }}
+        </a-tag>
+      </template>
+
+      <template v-if="column.key === 'status'">
+        <div :style="{ color: record.status === 1 ? 'green' : record.status === 2 ? 'red' : '' }">
+          {{ record.status === 0 ? '申请中' : record.status === 1 ? '已成功' : record.status === 2 ? '已拒绝' : '' }}
+        </div>
+      </template>
+
+      <template v-if="column.key === 'num'">
+        {{ record.Stock[0].num }}
+      </template>
+
+      <template v-if="column.key === 'goodName'">
+        {{ record.Stock[0].goodName }}
+      </template>
+
+      <template v-if="column.key === 'startTime'">
+        {{ dayjs(record.Stock[0].startTime).format('YYYY-MM-DD') }}
+      </template>
+
+      <template v-if="column.key === 'endTime'">
+        {{ dayjs(record.Stock[0].endTime).format('YYYY-MM-DD') }}
       </template>
     </template>
   </a-table>
 
   <a-modal
     v-model:open="addOpen"
-    title="添加运输员"
+    title="添加申请"
     style="text-align: center"
   >
     <template #footer>
@@ -189,56 +195,52 @@ const handleUpdateSave = async () => {
     </template>
     <div style="text-align: left; padding-left: 40px">
       <div style="margin-bottom: 20px; margin-top: 20px">
-        <span style="display: inline-block; width: 100px">运输员姓名：</span>
+        <span style="display: inline-block; width: 80px">商品名称：</span>
         <a-input
-          v-model:value="addTransporter.name"
+          v-model:value="addInventory.stockName"
           style="width: 200px"
         />
       </div>
-      <div style="margin-bottom: 20px; margin-top: 20px">
-        <span style="display: inline-block; width: 100px">电话号码</span>
-        <a-input
-          v-model:value="addTransporter.phone"
-          style="width: 200px"
-        />
-      </div>
-    </div>
-  </a-modal>
-
-  <a-modal
-    v-model:open="updateOpen"
-    title="修改运输员信息"
-    style="text-align: center"
-  >
-    <template #footer>
-      <a-button
-        key="back"
-        @click="updateOpen = false"
-      >
-        取消
-      </a-button>
-      <a-button
-        key="submit"
-        type="primary"
-        @click="handleUpdateSave"
-      >
-        确定
-      </a-button>
-    </template>
-    <div style="text-align: left; padding-left: 40px">
-      <div style="margin-bottom: 20px; margin-top: 20px">
-        <span style="display: inline-block; width: 100px">运输员姓名：</span>
-        <a-input
-          v-model:value="updateTransporter.name"
-          style="width: 200px"
+      <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
+        <span style="display: inline-block; width: 80px">数量：</span>
+        <a-input-number
+          v-model:value="addInventory.num"
+          :min="1"
         />
       </div>
       <div style="margin-bottom: 20px; margin-top: 20px">
-        <span style="display: inline-block; width: 100px">电话号码</span>
-        <a-input
-          v-model:value="updateTransporter.phone"
-          style="width: 200px"
+        <span style="display: inline-block; width: 80px">商品种类：</span>
+        <a-select
+          v-model:value="addInventory.species"
+          style="width: 120px"
+          :options="options2"
         />
+      </div>
+      <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
+        <span style="display: inline-block; width: 80px">商家编号：</span>
+        <a-select
+          v-model:value="addInventory.businessId"
+          style="width: 120px"
+          :options="options"
+        />
+      </div>
+      <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
+        <span style="display: inline-block; width: 80px">保质期：</span>
+        <a-range-picker
+          :placeholder="['开始时间', '结束时间']"
+          v-model:value="addInventory.timer"
+          :format="dateFormat"
+        />
+      </div>
+      <div style="margin-bottom: 20px; margin-top: 20px; display: flex">
+        <span style="display: inline-block; width: 80px">出入库：</span>
+        <a-radio-group
+          v-model:value="addInventory.type"
+          name="radioGroup"
+        >
+          <a-radio value="入库">入库</a-radio>
+          <a-radio value="出库">出库</a-radio>
+        </a-radio-group>
       </div>
     </div>
   </a-modal>

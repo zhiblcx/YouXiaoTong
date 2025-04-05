@@ -62,6 +62,28 @@ const routes = [
     ]
   },
   {
+    path: '/stock',
+    component: Layout,
+    meta: { breadcrumb: '库存管理' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/pages/StockManagement.vue')
+      }
+    ]
+  },
+  {
+    path: '/stock2',
+    component: Layout,
+    meta: { breadcrumb: '库存管理' },
+    children: [
+      {
+        path: '',
+        component: () => import('@/pages/Stock.vue')
+      }
+    ]
+  },
+  {
     path: '/inventory',
     component: Layout,
     meta: { breadcrumb: '出入库申请' },

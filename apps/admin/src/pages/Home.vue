@@ -17,12 +17,10 @@ onMounted(async () => {
   const { data: person } = await showPersonApi()
   if (person.statusCode === undefined) {
     currentPerson.value = person
-    console.log(person)
     if (person.type != null) {
       // 水电 和 食堂商家
       const { data: result } = await showBusinessSystemAPi(person.id)
       currentData.value = result
-      console.log(result)
     } else {
       // 管理员
       const { data: result } = await showSystemApi()

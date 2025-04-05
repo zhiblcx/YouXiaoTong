@@ -35,7 +35,6 @@ onMounted(async () => {
   if (data.statusCode === undefined) {
     store.updateUserId(data.id)
     if (data.account !== 'admin') {
-      console.log(data)
       store.updateName(data.name)
       store.updateType(data.type)
     } else {
@@ -144,6 +143,11 @@ function editPassword() {
             <span>商品种类管理</span>
           </a-menu-item>
 
+          <a-menu-item key="stock2">
+            <GoldOutlined />
+            <span>库存管理</span>
+          </a-menu-item>
+
           <a-sub-menu key="article">
             <template #title>
               <file-outlined />
@@ -188,6 +192,11 @@ function editPassword() {
           <a-menu-item key="species">
             <TagsOutlined />
             <span>商品种类管理</span>
+          </a-menu-item>
+
+          <a-menu-item key="stock">
+            <GoldOutlined />
+            <span>库存管理</span>
           </a-menu-item>
 
           <a-menu-item key="charge">

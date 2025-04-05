@@ -23,7 +23,7 @@ async function login() {
   const { data } = await loginApi({ account: account.value, password: password.value, type: type.value })
   if (data.status === undefined) {
     localStorage.setItem('token', data.access_token)
-    router.push('/')
+    type.value !== '运输员' ? router.push('/') : router.push('/inventory')
     message.success('登录成功')
   } else {
     message.error(data.message)
